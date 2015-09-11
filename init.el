@@ -7,6 +7,9 @@
 (require 'package)
 
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; basic config
+
 ;; Always load newest byte code
 (setq load-prefer-newer t)
 
@@ -38,12 +41,60 @@
 
 
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; ui config
+
+;; maximize on startup
+(add-to-list 'default-frame-alist '(fullscreen . maximized))
+
+;; remove scroll bar
+(scroll-bar-mode -1)
+
+;; colors
+(set-background-color "#f1f1f1")
+(add-to-list 'default-frame-alist '(background-color . "#f1f1f1"))
+(set-default-font "Ubuntu Mono 13")
+
+;; disable tool bar
+(when (fboundp 'tool-bar-mode)
+  (tool-bar-mode -1))
+(menu-bar-mode -1)
+
+;; the blinking cursor is nothing, but an annoyance
+(blink-cursor-mode -1)
+
+;; disable startup screen
+(setq inhibit-startup-screen t)
+
+;; nice scrolling
+(setq scroll-margin 0
+      scroll-conservatively 100000
+      scroll-preserve-screen-position 1)
+
+;; mode line settings
+(line-number-mode t)
+(column-number-mode t)
+;; (size-indication-mode t)
+
+;; enable y/n answers
+(fset 'yes-or-no-p 'y-or-n-p)
+
+;; set frame title
+(setq frame-title-format
+      '("" invocation-name
+	" Avil Page - "
+	(:eval (if (buffer-file-name)
+		   (abbreviate-file-name (buffer-file-name))
+		 "%b"))))
+
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Packages
 
 ;; add melpa to archives
 (add-to-list 'package-archives
-             '("melpa" . "http://melpa.org/packages/") t)
+	     '("melpa" . "http://melpa.org/packages/") t)
 (package-refresh-contents)
 
 ;; dont check signatures
@@ -63,14 +114,12 @@
 
 (use-package smartparens
   :config
-  
   (sp-pair "`" "`" :wrap "C-`")
   (sp-pair "%" "%" :wrap "C-%")
   (sp-pair "<" ">" :wrap "C->")
   (defun strict-smartparens ()
     (turn-on-smartparens-strict-mode))
-  (add-hook 'prog-mode-hook 'strict-smartparens)
-  (add-hook 'prelude-prog-mode-hook (lambda () (smartparens-mode -1)) t))
+  (add-hook 'prog-mode-hook 'strict-smartparens))
 
 
 (use-package elpy
@@ -86,7 +135,7 @@
     (elpy-shell-send-region-or-buffer arg)
     (with-current-buffer (process-buffer (elpy-shell-get-or-create-process))
       (set-window-point (get-buffer-window (current-buffer))
-                        (point-max))))
+			(point-max))))
   (define-key elpy-mode-map (kbd "C-<right>") 'elpy-nav-forward-indent)
   (define-key elpy-mode-map (kbd "C-<left>") 'elpy-nav-backward-indent)
   (define-key elpy-mode-map (kbd "C-c C-c") 'my/send-region-or-buffer))
@@ -192,24 +241,24 @@
     (setq electric-case-max-iteration 2)
 
     (setq electric-case-criteria
-          (lambda (b e)
-            (let ((proper (electric-case--possible-properties b e))
-                  (key (key-description (this-single-command-keys))))
-              (cond
-               ((member 'font-lock-variable-name-face proper)
-                ;; #ifdef A_MACRO  /  int variable_name;
-                (if (member '(cpp-macro) (python-guess-basic-syntax)) 'usnake 'snake))
-               ((member 'font-lock-string-face proper) nil)
-               ((member 'font-lock-comment-face proper) nil)
-               ((member 'font-lock-keyword-face proper) nil)
-               ((member 'font-lock-function-name-face proper) 'snake)
-               ((member 'font-lock-type-face proper) 'snake)
-               (electric-case-convert-calls 'snake)
-               (t nil)))))
+	  (lambda (b e)
+	    (let ((proper (electric-case--possible-properties b e))
+		  (key (key-description (this-single-command-keys))))
+	      (cond
+	       ((member 'font-lock-variable-name-face proper)
+		;; #ifdef A_MACRO  /  int variable_name;
+		(if (member '(cpp-macro) (python-guess-basic-syntax)) 'usnake 'snake))
+	       ((member 'font-lock-string-face proper) nil)
+	       ((member 'font-lock-comment-face proper) nil)
+	       ((member 'font-lock-keyword-face proper) nil)
+	       ((member 'font-lock-function-name-face proper) 'snake)
+	       ((member 'font-lock-type-face proper) 'snake)
+	       (electric-case-convert-calls 'snake)
+	       (t nil)))))
 
     (defadvice electric-case-trigger (around electric-case-c-try-semi activate)
       (when (and electric-case-mode
-                 (eq major-mode 'python-mode)))))
+		 (eq major-mode 'python-mode)))))
 
   (add-hook 'python-mode-hook 'electric-case-python-init)
   (setq electric-case-convert-calls t))
@@ -272,36 +321,35 @@
   (openwith-mode t)
   (setq large-file-warning-threshold 500000000)
   (setq openwith-associations
-        (list (list (openwith-make-extension-regexp '("pdf"))
-                    "evince" '(file))
-              (list (openwith-make-extension-regexp '("flac" "mp3" "wav"))
-                    "vlc" '(file))
-              (list (openwith-make-extension-regexp
-                     '("avi" "flv" "mov" "mp4" "mkv" "mpeg" "mpg" "ogg" "wmv"))
-                    "vlc" '(file))
-              (list (openwith-make-extension-regexp '("bmp" "jpeg" "jpg" "png"))
-                    "ristretto" '(file))
-              (list (openwith-make-extension-regexp '("doc" "docx" "odt"))
-                    "libreoffice" '("--writer" file))
-              (list (openwith-make-extension-regexp '("ods" "xls" "xlsx"))
-                    "libreoffice" '("--calc" file))
-              (list (openwith-make-extension-regexp '("odp" "pps" "ppt" "pptx"))
-                    "libreoffice" '("--impress" file))
-              )))
+	(list (list (openwith-make-extension-regexp '("pdf"))
+		    "evince" '(file))
+	      (list (openwith-make-extension-regexp '("flac" "mp3" "wav"))
+		    "vlc" '(file))
+	      (list (openwith-make-extension-regexp
+		     '("avi" "flv" "mov" "mp4" "mkv" "mpeg" "mpg" "ogg" "wmv"))
+		    "vlc" '(file))
+	      (list (openwith-make-extension-regexp '("bmp" "jpeg" "jpg" "png"))
+		    "ristretto" '(file))
+	      (list (openwith-make-extension-regexp '("doc" "docx" "odt"))
+		    "libreoffice" '("--writer" file))
+	      (list (openwith-make-extension-regexp '("ods" "xls" "xlsx"))
+		    "libreoffice" '("--calc" file))
+	      (list (openwith-make-extension-regexp '("odp" "pps" "ppt" "pptx"))
+		    "libreoffice" '("--impress" file))
+	      )))
 
 
 (use-package easy-kill
   :config
   (bind-key "M-w" 'easy-kill))
 
-(use-package helm-dired-recent-dirs)
+
 (use-package helm-chrome)
 (use-package helm-swoop)
 (use-package helm-descbinds)
 (use-package helm-projectile)
 (use-package helm-ag)
-(require 'helm-eshell)
-
+(use-package helm-dired-recent-dirs)
 (use-package helm-github-stars
   :config
   (setq helm-github-stars-username "chillaranand"))
@@ -309,14 +357,16 @@
 
 (use-package helm
   :config
-  
+
+  (require 'helm-eshell)
+
   (defvar helm-source-emacs-commands
     (helm-build-sync-source "Emacs commands"
       :candidates (lambda ()
-                    (let ((cmds))
-                      (mapatoms
-                       (lambda (elt) (when (commandp elt) (push elt cmds))))
-                      cmds))
+		    (let ((cmds))
+		      (mapatoms
+		       (lambda (elt) (when (commandp elt) (push elt cmds))))
+		      cmds))
       :coerce #'intern-soft
       :action #'command-execute)
     "A simple helm source for Emacs commands.")
@@ -324,30 +374,43 @@
   (defvar helm-source-emacs-commands-history
     (helm-build-sync-source "Emacs commands history"
       :candidates (lambda ()
-                    (let ((cmds))
-                      (dolist (elem extended-command-history)
-                        (push (intern elem) cmds))
-                      cmds))
+		    (let ((cmds))
+		      (dolist (elem extended-command-history)
+			(push (intern elem) cmds))
+		      cmds))
       :coerce #'intern-soft
       :action #'command-execute)
     "Emacs commands history")
 
   (setq helm-mini-default-sources '(helm-source-buffers-list
-                                    helm-source-recentf
-                                    helm-source-dired-recent-dirs
-                                    helm-source-emacs-commands-history
-                                    helm-source-emacs-commands
-                                    helm-chrome-source
-                                    hgs/helm-c-source-stars
-                                    hgs/helm-c-source-repos
-                                    helm-source-buffer-not-found
-                                    hgs/helm-c-source-search))
-  (setq helm-M-x-always-save-history t)
-  (bind-key "C-x r l" 'helm-bookmarks))
+				    helm-source-recentf
+				    helm-source-dired-recent-dirs
+				    helm-source-emacs-commands-history
+				    helm-source-emacs-commands
+				    helm-chrome-source
+				    hgs/helm-c-source-stars
+				    hgs/helm-c-source-repos
+				    helm-source-buffer-not-found
+				    hgs/helm-c-source-search))
 
-(use-package phi-search
-  :init
-  (global-set-key (kbd "C-s") 'phi-search))
+  (setq  helm-ff-newfile-prompt-p              nil
+	 helm-M-x-always-save-history          t
+	 helm-split-window-in-side-p           t
+	 helm-buffers-fuzzy-matching           t
+	 helm-move-to-line-cycle-in-source     t
+	 helm-ff-search-library-in-sexp        t
+	 helm-ff-file-name-history-use-recentf t))
+
+
+;; swiper for search
+(use-package swiper-helm
+  :config
+  (ivy-mode 1)
+  (setq ivy-use-virtual-buffers t)
+  (global-set-key "\C-s" 'swiper)
+  (global-set-key "\C-r" 'swiper)
+  (global-set-key (kbd "C-c C-r") 'ivy-resume)
+  (global-set-key [f8] 'ivy-resume))
 
 
 (use-package aggressive-indent
@@ -481,7 +544,7 @@
 ;; unzip zipped file dired
 (eval-after-load "dired-aux"
   '(add-to-list 'dired-compress-file-suffixes
-                '("\\.zip\\'" ".zip" "unzip")))
+		'("\\.zip\\'" ".zip" "unzip")))
 
 (use-package dired+
   :config
@@ -518,7 +581,7 @@
 ;;   (emms-default-players))
 
 ;; (use-package elpy)
-;; (add-to-list 'load-path "~/projects/lisp/elpy") 
+;; (add-to-list 'load-path "~/projects/lisp/elpy")
 ;; (load "elpy" nil t)
 ;; (elpy-enable)
 
@@ -575,6 +638,11 @@
 ;; (load-file "~/projects/lisp/real-auto-save/real-auto-save.el")
 ;; (add-hook 'prog-mode-hook 'real-auto-save-mode)
 ;; (setq real-auto-save-interval 4)
+
+
+;; (use-package phi-search
+;;   :init
+;;   (global-set-key (kbd "C-s") 'phi-search))
 
 
 
@@ -653,10 +721,10 @@ Repeated invocations toggle between the two most recently open buffers."
   ;; We need the new emacs to be spawned after all kill-emacs-hooks
   ;; have been processed and there is nothing interesting left
   (add-hook 'kill-emacs-hook
-            (if (display-graphic-p)
-                #'launch-separate-emacs-under-x
-              #'launch-separate-emacs-in-terminal)
-            t)
+	    (if (display-graphic-p)
+		#'launch-separate-emacs-under-x
+	      #'launch-separate-emacs-in-terminal)
+	    t)
   (kill-emacs))
 
 (defun get-positions-of-line-or-region ()
@@ -664,10 +732,10 @@ Repeated invocations toggle between the two most recently open buffers."
 or region."
   (let (beg end)
     (if (and mark-active (> (point) (mark)))
-        (exchange-point-and-mark))
+	(exchange-point-and-mark))
     (setq beg (line-beginning-position))
     (if mark-active
-        (exchange-point-and-mark))
+	(exchange-point-and-mark))
     (setq end (line-end-position))
     (cons beg end)))
 
@@ -678,14 +746,14 @@ If there's no region, the current line will be duplicated.  However, if
 there's a region, all lines that region covers will be duplicated."
   (interactive "p")
   (pcase-let* ((origin (point))
-               (`(,beg . ,end) (get-positions-of-line-or-region))
-               (region (buffer-substring-no-properties beg end)))
+	       (`(,beg . ,end) (get-positions-of-line-or-region))
+	       (region (buffer-substring-no-properties beg end)))
     (-dotimes arg
       (lambda (n)
-        (goto-char end)
-        (newline)
-        (insert region)
-        (setq end (point))))
+	(goto-char end)
+	(newline)
+	(insert region)
+	(setq end (point))))
     (goto-char (+ origin (* (length region) arg) arg))))
 
 
@@ -693,51 +761,51 @@ there's a region, all lines that region covers will be duplicated."
   "Uncomment a sexp around point."
   (interactive "P")
   (let* ((initial-point (point-marker))
-         (p)
-         (end (save-excursion
-                (when (elt (syntax-ppss) 4)
-                  (re-search-backward comment-start-skip
-                                      (line-beginning-position)
-                                      t))
-                (setq p (point-marker))
-                (comment-forward (point-max))
-                (point-marker)))
-         (beg (save-excursion
-                (forward-line 0)
-                (while (= end (save-excursion
-                                (comment-forward (point-max))
-                                (point)))
-                  (forward-line -1))
-                (goto-char (line-end-position))
-                (re-search-backward comment-start-skip
-                                    (line-beginning-position)
-                                    t)
-                (while (looking-at-p comment-start-skip)
-                  (forward-char -1))
-                (point-marker))))
+	 (p)
+	 (end (save-excursion
+		(when (elt (syntax-ppss) 4)
+		  (re-search-backward comment-start-skip
+				      (line-beginning-position)
+				      t))
+		(setq p (point-marker))
+		(comment-forward (point-max))
+		(point-marker)))
+	 (beg (save-excursion
+		(forward-line 0)
+		(while (= end (save-excursion
+				(comment-forward (point-max))
+				(point)))
+		  (forward-line -1))
+		(goto-char (line-end-position))
+		(re-search-backward comment-start-skip
+				    (line-beginning-position)
+				    t)
+		(while (looking-at-p comment-start-skip)
+		  (forward-char -1))
+		(point-marker))))
     (unless (= beg end)
       (uncomment-region beg end)
       (goto-char p)
       ;; Indentify the "top-level" sexp inside the comment.
       (while (and (ignore-errors (backward-up-list) t)
-                  (>= (point) beg))
-        (skip-chars-backward (rx (syntax expression-prefix)))
-        (setq p (point-marker)))
-      ;; Re-comment everything before it. 
+		  (>= (point) beg))
+	(skip-chars-backward (rx (syntax expression-prefix)))
+	(setq p (point-marker)))
+      ;; Re-comment everything before it.
       (ignore-errors
-        (comment-region beg p))
+	(comment-region beg p))
       ;; And everything after it.
       (goto-char p)
       (forward-sexp (or n 1))
       (skip-chars-forward "\r\n[:blank:]")
       (if (< (point) end)
-          (ignore-errors
-            (comment-region (point) end))
-        ;; If this is a closing delimiter, pull it up.
-        (goto-char end)
-        (skip-chars-forward "\r\n[:blank:]")
-        (when (= 5 (car (syntax-after (point))))
-          (delete-indentation))))
+	  (ignore-errors
+	    (comment-region (point) end))
+	;; If this is a closing delimiter, pull it up.
+	(goto-char end)
+	(skip-chars-forward "\r\n[:blank:]")
+	(when (= 5 (car (syntax-after (point))))
+	  (delete-indentation))))
     ;; Without a prefix, it's more useful to leave point where
     ;; it was.
     (unless n
@@ -746,9 +814,9 @@ there's a region, all lines that region covers will be duplicated."
 (defun comment-sexp--raw ()
   "Comment the sexp at point or ahead of point."
   (pcase (or (bounds-of-thing-at-point 'sexp)
-             (save-excursion
-               (skip-chars-forward "\r\n[:blank:]")
-               (bounds-of-thing-at-point 'sexp)))
+	     (save-excursion
+	       (skip-chars-forward "\r\n[:blank:]")
+	       (bounds-of-thing-at-point 'sexp)))
     (`(,l . ,r)
      (goto-char r)
      (skip-chars-forward "\r\n[:blank:]")
@@ -761,56 +829,17 @@ If already inside (or before) a comment, uncomment instead.
 With a prefix argument N, (un)comment that many sexps."
   (interactive "P")
   (if (or (elt (syntax-ppss) 4)
-          (< (save-excursion
-               (skip-chars-forward "\r\n[:blank:]")
-               (point))
-             (save-excursion
-               (comment-forward 1)
-               (point))))
+	  (< (save-excursion
+	       (skip-chars-forward "\r\n[:blank:]")
+	       (point))
+	     (save-excursion
+	       (comment-forward 1)
+	       (point))))
       (uncomment-sexp n)
     (dotimes (_ (or n 1))
       (comment-sexp--raw))))
 
 
-;; maximize on startup
-(add-to-list 'default-frame-alist '(fullscreen . maximized))
-
-;; remove scroll bar
-(scroll-bar-mode -1)
-
-;; colors
-(set-background-color "#f1f1f1")
-(add-to-list 'default-frame-alist '(background-color . "#f1f1f1"))
-(set-default-font "Ubuntu Mono 13")
-
-;; disable tool bar
-(when (fboundp 'tool-bar-mode)
-  (tool-bar-mode -1))
-(menu-bar-mode -1)
-
-;; the blinking cursor is nothing, but an annoyance
-(blink-cursor-mode -1)
-
-;; disable startup screen
-(setq inhibit-startup-screen t)
-
-;; nice scrolling
-(setq scroll-margin 0
-      scroll-conservatively 100000
-      scroll-preserve-screen-position 1)
-
-;; mode line settings
-(line-number-mode t)
-(column-number-mode t)
-(size-indication-mode t)
-
-;; enable y/n answers
-(fset 'yes-or-no-p 'y-or-n-p)
-
-(setq frame-title-format
-      '("" invocation-name " Avil Page - " (:eval (if (buffer-file-name)
-                                                      (abbreviate-file-name (buffer-file-name))
-                                                    "%b"))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -834,13 +863,16 @@ With a prefix argument N, (un)comment that many sexps."
  ("C-x C-d" .  helm-find-files)
 
  ("C-x C-k" . kill-this-buffer)
- ("C-x C-m" . helm-M-x) 
+ ("C-x C-m" . helm-M-x)
  ("C-x C-z" . end-of-buffer)
- 
+
+ ("C-x r l" . helm-bookmarks)
+
  ("M-h" . backward-kill-word)
  ("M-o" . other-window)
  ("M-x" . helm-M-x)
- ("M-y" . helm-show-kill-ring) 
+ ("M-y" . helm-show-kill-ring)
+
 
  ("M-z" . zop-up-to-char)
  ("M-Z" . zop-to-char)
@@ -866,9 +898,9 @@ With a prefix argument N, (un)comment that many sexps."
 
 ;; kill lines backward
 (global-set-key (kbd "C-<backspace>") (lambda ()
-                                        (interactive)
-                                        (kill-line 0)
-                                        (indent-according-to-mode)))
+					(interactive)
+					(kill-line 0)
+					(indent-according-to-mode)))
 
 ;; (global-set-key [remap kill-whole-line] 'delete-whole-line)
 
@@ -877,8 +909,8 @@ With a prefix argument N, (un)comment that many sexps."
   (lambda () (interactive)
     (let ((case-fold-search isearch-case-fold-search))
       (occur (if isearch-regexp
-                 isearch-string
-               (regexp-quote isearch-string))))))
+		 isearch-string
+	       (regexp-quote isearch-string))))))
 
 (unless (fboundp 'toggle-frame-fullscreen)
   (global-set-key (kbd "<f11>") 'prelude-fullscreen))
@@ -892,8 +924,8 @@ With a prefix argument N, (un)comment that many sexps."
 
 ;; use helm to list eshell history
 (add-hook 'eshell-mode-hook
-          #'(lambda ()
-              (substitute-key-definition 'eshell-list-history 'helm-eshell-history eshell-mode-map)))
+	  #'(lambda ()
+	      (substitute-key-definition 'eshell-list-history 'helm-eshell-history eshell-mode-map)))
 
 (substitute-key-definition 'find-tag 'helm-etags-select global-map)
 (setq projectile-completion-system 'helm)
@@ -941,4 +973,3 @@ With a prefix argument N, (un)comment that many sexps."
 (provide 'init)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; init.el ends here
-
