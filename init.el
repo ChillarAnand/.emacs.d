@@ -6,7 +6,6 @@
 (require 'cl)
 (require 'package)
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; basic config
 
@@ -37,6 +36,7 @@
 (defvar root-dir (file-name-directory load-file-name)
   "The root dir of the Emacs")
 (setq package-user-dir (expand-file-name "elpa" root-dir))
+(setq package-vendor-dir (expand-file-name "vendor" root-dir))
 (load-file (expand-file-name ".private.el" root-dir))
 
 
@@ -93,17 +93,21 @@
 ;; Packages
 
 ;; add melpa to archives
-(add-to-list 'package-archives
-	     '("melpa" . "http://melpa.org/packages/") t)
-(package-refresh-contents)
+(defun install-packages (switch)
+  "Refresh package contents if -i switch is passed."
+  (message "-i was passed. refreshing package contents")
+  (add-to-list 'package-archives
+	       '("melpa" . "http://melpa.org/packages/") t)
+  (package-refresh-contents)
+  ;; install use package
+  (unless (package-installed-p 'use-package)
+    (package-install 'use-package)))
+(add-to-list 'command-switch-alist '("-i" . install-packages))
 
 ;; dont check signatures
 (package-initialize)
 (setq package-check-signature nil)
 
-;; install use package
-(unless (package-installed-p 'use-package)
-  (package-install 'use-package))
 (require 'use-package)
 (setq use-package-always-ensure t)
 
@@ -124,6 +128,7 @@
 
 (use-package elpy
   :config
+  (elpy-enable)
   (setq python-indent-offset 4)
   (setq elpy-test-runner 'elpy-test-pytest-runner)
   (setq elpy-rpc-timeout nil)
@@ -156,7 +161,7 @@
 
 
 (use-package company
-  :init
+  :config
   (global-company-mode 1)
 
   (setq company-idle-delay 0)
@@ -272,25 +277,6 @@
   (sml/apply-theme 'light))
 
 
-;; (use-package circe
-;;   :init
-;;   (setq circe-network-options
-;;         `(("Freenode"
-;;            :nick "chillaranand"
-;;            :channels
-;;            ("#emacs" "#emacs-circe" "#emacs-elpy"
-;;             "#python-india" "#python-dev"
-;;             "#dgplug")
-;;            :nickserv-password ,freenode-password)))
-;;   (setq circe-reduce-lurker-spam t))
-
-
-;; (use-package wakatime-mode
-;;   :config
-;;   (setq wakatime-python-bin "/usr/local/bin/wakatime")
-;;   (global-wakatime-mode))
-
-
 (use-package impatient-mode)
 
 (use-package pony-mode
@@ -343,6 +329,10 @@
   :config
   (bind-key "M-w" 'easy-kill))
 
+(use-package paren
+  :config
+  (setq show-paren-style 'parenthesis)
+  (show-paren-mode +1))
 
 (use-package helm-chrome)
 (use-package helm-swoop)
@@ -353,7 +343,6 @@
 (use-package helm-github-stars
   :config
   (setq helm-github-stars-username "chillaranand"))
-
 
 (use-package helm
   :config
@@ -394,6 +383,7 @@
 				    hgs/helm-c-source-search))
 
   (setq  helm-ff-newfile-prompt-p              nil
+	 helm-echo-input-in-header-line        t
 	 helm-M-x-always-save-history          t
 	 helm-split-window-in-side-p           t
 	 helm-buffers-fuzzy-matching           t
@@ -406,9 +396,11 @@
 (use-package swiper-helm
   :config
   (ivy-mode 1)
+  ;; make swiper to use helm display
+  (setq swiper-helm-display-function 'helm-default-display-buffer)
   (setq ivy-use-virtual-buffers t)
-  (global-set-key "\C-s" 'swiper)
-  (global-set-key "\C-r" 'swiper)
+  (global-set-key "\C-s" 'swiper-helm)
+  (global-set-key "\C-r" 'swiper-helm)
   (global-set-key (kbd "C-c C-r") 'ivy-resume)
   (global-set-key [f8] 'ivy-resume))
 
@@ -586,53 +578,59 @@
 ;; (elpy-enable)
 
 
-;; (require 'sql)
-;; (require 'mysql)
-;; (use-package sqlup-mode)
-;; (progn
-;;   (add-hook 'sql-mode-hook 'sqlup-mode)
-;;   (add-hook 'sql-interactive-mode-hook
-;;             (lambda ()
-;;               (toggle-truncate-lines t)))
+(require 'sql)
+(load-file (expand-file-name "mysql.el" package-vendor-dir))
+(require 'mysql)
+(use-package sqlup-mode
+  :config
+  (add-hook 'sql-mode-hook 'sqlup-mode))
+(progn  
+  (sql-set-product "mysql")
+  (setq sql-port 3306)
+  (setq sql-connection-alist
+        '(
+	  (pool-server
+           (sql-server sql-server-address)
+           (sql-user sql-server-user)
+           (sql-password sql-server-password)
+           (sql-database sql-server-database)
+           (sql-port sql-port))
 
-;;   (sql-set-product "mysql")
-;;   (setq sql-connection-alist
-;;         '((pool-server
-;;            (sql-server sql-server-address)
-;;            (sql-user sql-server-user)
-;;            (sql-password sql-server-password)
-;;            (sql-database sql-server-database)
-;;            (sql-port sql-server-port))
+          (pool-local
+           (sql-server sql-local-server)
+           (sql-user sql-local-user)
+           (sql-password sql-local-password)
+           (sql-database sql-local-database)
+           (sql-port sql-port))))
 
-;;           (pool-local
-;;            (sql-server sql-local-server)
-;;            (sql-user sql-local-user)
-;;            (sql-password sql-local-password)
-;;            (sql-database sql-local-database)
-;;            (sql-port sql-local-port))))
+  (defun sql-connect-preset (name)
+    "Connect to a predefined SQL connection listed in `sql-connection-alist'"
+    (eval `(let ,(cdr (assoc name sql-connection-alist))
+             (flet ((sql-get-login (&rest what)))
+               (sql-product-interactive sql-product)))))
 
-;;   (defun sql-connect-preset (name)
-;;     "Connect to a predefined SQL connection listed in `sql-connection-alist'"
-;;     (eval `(let ,(cdr (assoc name sql-connection-alist))
-;;              (flet ((sql-get-login (&rest what)))
-;;                (sql-product-interactive sql-product)))))
+  (defun sql-pool-server ()
+    (interactive)
+    (sql-connect-preset 'pool-server))
 
-;;   (defun sql-pool-server ()
-;;     (interactive)
-;;     (sql-connect-preset 'pool-server))
+  (defun sql-pool-local ()
+    (interactive)
+    (sql-connect-preset 'pool-local))
 
-;;   (defun sql-pool-local ()
-;;     (interactive)
-;;     (sql-connect-preset 'pool-local))
+  (defun mysql-send-paragraph ()
+    (interactive)
+    (sql-send-paragraph)
+    (with-current-buffer (process-buffer (get-process "SQL"))
+      (set-window-point (get-buffer-window (current-buffer))
+                        (point-max))))
+  (add-hook 'sql-interactive-mode-hook
+            (lambda ()
+              (toggle-truncate-lines t)))
 
-;;   (defun mysql-send-paragraph ()
-;;     (interactive)
-;;     (sql-send-paragraph)
-;;     (with-current-buffer (process-buffer (get-process "SQL"))
-;;       (set-window-point (get-buffer-window (current-buffer))
-;;                         (point-max))))
+  (define-key sql-mode-map (kbd "C-c C-c") 'mysql-send-paragraph))
 
-;;   (define-key sql-mode-map (kbd "C-c C-c") 'mysql-send-paragraph))
+
+
 
 
 ;; (load-file "~/projects/lisp/real-auto-save/real-auto-save.el")
@@ -643,6 +641,25 @@
 ;; (use-package phi-search
 ;;   :init
 ;;   (global-set-key (kbd "C-s") 'phi-search))
+
+;; (use-package circe
+;;   :init
+;;   (setq circe-network-options
+;;         `(("Freenode"
+;;            :nick "chillaranand"
+;;            :channels
+;;            ("#emacs" "#emacs-circe" "#emacs-elpy"
+;;             "#python-india" "#python-dev"
+;;             "#dgplug")
+;;            :nickserv-password ,freenode-password)))
+;;   (setq circe-reduce-lurker-spam t))
+
+
+;; (use-package wakatime-mode
+;;   :config
+;;   (setq wakatime-python-bin "/usr/local/bin/wakatime")
+;;   (global-wakatime-mode))
+
 
 
 
@@ -757,6 +774,30 @@ there's a region, all lines that region covers will be duplicated."
     (goto-char (+ origin (* (length region) arg) arg))))
 
 
+(defun smart-move-beginning-of-line (arg)
+  "Move point back to indentation of beginning of line.
+Move point to the first non-whitespace character on this line.
+If point is already there, move to the beginning of the line.
+Effectively toggle between the first non-whitespace character and
+the beginning of the line.
+If ARG is not nil or 1, move forward ARG - 1 lines first.  If
+point reaches the beginning or end of the buffer, stop there."
+  (interactive "^p")
+  (setq arg (or arg 1))
+
+  ;; Move lines first
+  (when (/= arg 1)
+    (let ((line-move-visual nil))
+      (forward-line (1- arg))))
+
+  (let ((orig-point (point)))
+    (back-to-indentation)
+    (when (= orig-point (point))
+      (move-beginning-of-line 1))))
+
+(global-set-key [remap move-beginning-of-line]
+                'smart-move-beginning-of-line)
+
 (defun uncomment-sexp (&optional n)
   "Uncomment a sexp around point."
   (interactive "P")
@@ -853,27 +894,26 @@ With a prefix argument N, (un)comment that many sexps."
  ("C-," .  avy-goto-char)
  ("C-^" .  top-join-line)
 
- ("C-c C-f" .  helm-projectile-find-file)
- ("C-c C-g" .  beginning-of-buffer)
- ("C-c C-k" .  delete-other-windows)
- ("C-c C-v" .  eval-buffer)
- ("C-x C-a" .  beginning-of-buffer)
- ("C-x C-b" .  switch-to-previous-buffer)
- ("C-x C-d" .  duplicate-current-line-or-region)
- ("C-x C-d" .  helm-find-files)
-
+ ("C-x C-1" . delete-other-windows)
+ ("C-x C-3" . split-window-right)
+ ("C-x C-a" . beginning-of-buffer)
+ ("C-x C-b" . switch-to-previous-buffer)
+ ("C-x C-d" . duplicate-current-line-or-region)
+ ("C-x C-i" . delete-other-windows)
  ("C-x C-k" . kill-this-buffer)
  ("C-x C-m" . helm-M-x)
  ("C-x C-z" . end-of-buffer)
-
  ("C-x r l" . helm-bookmarks)
 
+ ("C-c C-f" . helm-projectile-find-file)
+ ("C-c C-g" . beginning-of-buffer)
+ ("C-c C-k" . delete-other-windows)
+ ("C-c C-v" . eval-buffer) 
+ 
  ("M-h" . backward-kill-word)
  ("M-o" . other-window)
  ("M-x" . helm-M-x)
  ("M-y" . helm-show-kill-ring)
-
-
  ("M-z" . zop-up-to-char)
  ("M-Z" . zop-to-char)
  ("M-?" . mark-paragraph)
@@ -885,16 +925,6 @@ With a prefix argument N, (un)comment that many sexps."
 
 (define-key emacs-lisp-mode-map (kbd "C-M-;")
   #'comment-or-uncomment-sexp)
-
-
-(define-key 'help-command (kbd "A") 'apropos)
-(define-key 'help-command (kbd "C-f") 'find-function)
-(define-key 'help-command (kbd "C-i") 'info-display-manual)
-(define-key 'help-command (kbd "C-k") 'find-function-on-key)
-(define-key 'help-command (kbd "C-l") 'find-library)
-(define-key 'help-command (kbd "C-m") 'discover-my-major)
-(define-key 'help-command (kbd "C-v") 'find-variable)
-
 
 ;; kill lines backward
 (global-set-key (kbd "C-<backspace>") (lambda ()
