@@ -108,6 +108,23 @@
 (package-initialize)
 (setq package-check-signature nil)
 
+
+;; hide show mode
+(require 'hideshow)
+(global-set-key (kbd "<f2> h h") 'hs-hide-all)
+(global-set-key (kbd "<f2> h j") 'hs-show-all)
+
+;; save point positions across sessions
+(require 'saveplace)
+(setq-default save-place t)
+(setq save-place-forget-unreadable-files nil)
+(setq save-place-file (concat user-emacs-directory "saveplace.el"))
+
+
+;; enable semantic mode
+(semantic-mode 1)
+
+
 (require 'use-package)
 (setq use-package-always-ensure t)
 
@@ -132,6 +149,7 @@
   (setq python-indent-offset 4)
   (setq elpy-test-runner 'elpy-test-pytest-runner)
   (setq elpy-rpc-timeout nil)
+  (setq elpy-rgrep-file-pattern   "*.py *.html")
   ;; (setq elpy-rpc-python-command "python3")
   (append grep-find-ignored-files "flycheck_*")
 
@@ -141,8 +159,6 @@
     (with-current-buffer (process-buffer (elpy-shell-get-or-create-process))
       (set-window-point (get-buffer-window (current-buffer))
 			(point-max))))
-  (define-key elpy-mode-map (kbd "C-<right>") 'elpy-nav-forward-indent)
-  (define-key elpy-mode-map (kbd "C-<left>") 'elpy-nav-backward-indent)
   (define-key elpy-mode-map (kbd "C-c C-c") 'my/send-region-or-buffer))
 
 
@@ -278,12 +294,6 @@
 
 
 (use-package impatient-mode)
-
-(use-package pony-mode
-  :ensure t
-  :config
-  (setq pony-server-host "127.0.0.1")
-  (add-hook 'python-mode-hook 'pony-mode))
 
 
 (use-package highlight-symbol
@@ -445,15 +455,6 @@
 (use-package sotlisp)
 
 
-;; (require 'emmet-mode)
-;; (add-hook 'sgml-mode-hook 'emmet-mode)
-;; (add-hook 'html-mode-hook 'emmet-mode)
-;; (add-hook 'css-mode-hook  'emmet-mode)
-
-;; (use-package zencoding-mode)
-;; (add-hook 'html-mode-hook 'zencoding-mode)
-
-
 (use-package benchmark-init
   :config
   (benchmark-init/activate))
@@ -513,38 +514,23 @@
   :config
   (global-hl-line-mode 1))
 
-;; (use-package ws-butler
-;;   :config
-;;   (ws-butler-global-mode))
-
 
 (require 'dired)
 (setq delete-by-moving-to-trash t)
 (setq dired-no-confirm t)
 (define-key dired-mode-map "u" 'dired-up-directory)
-(defun delete-current-item ()
-  (interactive)
-  (dired-flag-file-deletion 1)
-  (dired-do-flagged-delete))
-(define-key dired-mode-map  [delete] 'delete-current-item)
 (setq dired-deletion-confirmer '(lambda (x) t))
 
 (defadvice dired-delete-entry (before force-clean-up-buffers (file) activate)
   (kill-buffer (get-file-buffer file)))
 
-(define-key dired-mode-map "u" 'dired-up-directory)
 ;; unzip zipped file dired
 (eval-after-load "dired-aux"
   '(add-to-list 'dired-compress-file-suffixes
 		'("\\.zip\\'" ".zip" "unzip")))
 
 (use-package dired+
-  :config
-  (defun dir ()
-    (interactive)
-    (dired-sort-other "ll"))
-  ;; (add-hook 'dired-mode-hook 'dir)
-  )
+  :config)
 
 
 (use-package flycheck-pos-tip
@@ -566,24 +552,12 @@
   (add-hook 'emacs-lisp-mode-hook (lambda () (lispy-mode 1))))
 
 
-;; (use-package soundcloud
-;;   :config
-;;   (require 'emms-setup)
-;;   (emms-standard)
-;;   (emms-default-players))
-
-;; (use-package elpy)
-;; (add-to-list 'load-path "~/projects/lisp/elpy")
-;; (load "elpy" nil t)
-;; (elpy-enable)
-
-
 (require 'sql)
-(load-file (expand-file-name "mysql.el" package-vendor-dir))
-(require 'mysql)
-(use-package sqlup-mode
-  :config
-  (add-hook 'sql-mode-hook 'sqlup-mode))
+;; (load-file (expand-file-name "mysql.el" package-vendor-dir))
+;; (require 'mysql)
+;; (use-package sqlup-mode
+;;   :config
+;;   (add-hook 'sql-mode-hook 'sqlup-mode))
 (progn  
   (sql-set-product "mysql")
   (setq sql-port 3306)
@@ -623,14 +597,12 @@
     (with-current-buffer (process-buffer (get-process "SQL"))
       (set-window-point (get-buffer-window (current-buffer))
                         (point-max))))
-  (add-hook 'sql-interactive-mode-hook
-            (lambda ()
-              (toggle-truncate-lines t)))
+  ;; (add-hook 'sql-interactive-mode-hook
+  ;;           (lambda ()
+  ;;             (toggle-truncate-lines t))
+  ;; 	    )
 
   (define-key sql-mode-map (kbd "C-c C-c") 'mysql-send-paragraph))
-
-
-
 
 
 ;; (load-file "~/projects/lisp/real-auto-save/real-auto-save.el")
@@ -655,10 +627,42 @@
 ;;   (setq circe-reduce-lurker-spam t))
 
 
+;; (require 'emmet-mode)
+;; (add-hook 'sgml-mode-hook 'emmet-mode)
+;; (add-hook 'html-mode-hook 'emmet-mode)
+;; (add-hook 'css-mode-hook  'emmet-mode)
+
+;; (use-package zencoding-mode)
+;; (add-hook 'html-mode-hook 'zencoding-mode)
+
+
+;; (use-package soundcloud
+;;   :config
+;;   (require 'emms-setup)
+;;   (emms-standard)
+;;   (emms-default-players))
+
+;; (use-package elpy)
+;; (add-to-list 'load-path "~/projects/lisp/elpy")
+;; (load "elpy" nil t)
+;; (elpy-enable)
+
+
 ;; (use-package wakatime-mode
 ;;   :config
 ;;   (setq wakatime-python-bin "/usr/local/bin/wakatime")
 ;;   (global-wakatime-mode))
+
+
+;; (use-package pony-mode
+;;   :ensure t
+;;   :config
+;;   (setq pony-server-host "127.0.0.1")
+;;   (add-hook 'python-mode-hook 'pony-mode))
+
+;; (use-package ws-butler
+;;   :config
+;;   (ws-butler-global-mode))
 
 
 
@@ -674,6 +678,17 @@
       (recenter 0))
     result))
 (advice-add 'help-button-action :around #'my-recenter-on-find-function)
+
+(defun retain-point-stage (orig &rest args)
+  (message "foo")
+  (let ((pos (point))
+	(result (apply orig args)))
+    (when result)
+    (message "foo")
+    (goto-char pos)
+    result))
+(advice-add 'magit-stage-file :before #'retain-point-stage)
+(advice-add 'magit-stage-file :around #'retain-point-stage)
 
 
 (defun delete-whole-line (&optional arg)
@@ -995,6 +1010,98 @@ With a prefix argument N, (un)comment that many sexps."
 (key-chord-define-global "pg" 'helm-projectile-grep)
 (key-chord-define-global "sm" 'set-mark-command)
 
+
+
+;; test
+;; (defun custom-mode-line-render (left center right &optional lpad rpad)
+;;   "Return a string the width of the current window with 
+;; LEFT, CENTER, and RIGHT spaced out accordingly, LPAD and RPAD,
+;; can be used to add a number of spaces to the front and back of the string."
+;;   (condition-case err
+;;       (let* ((left (if lpad (concat (make-string lpad ?\s) left) left))
+;;              (right (if rpad (concat right (make-string rpad ?\s)) right))
+;;              (width (apply '+ (window-width) (let ((m (window-margins))) (list (or (car m) 0) (or (cdr m) 0)))))
+;;              (total-length (+ (length left) (length center) (length right) 2)))
+;;         (when (> total-length width) (setq left "" right ""))
+;;         (let* ((left-space (/ (- width (length center)) 2))
+;;                (right-space (- width left-space (length center)))
+;;                (lspaces (max (- left-space (length left)) 1))
+;;                (rspaces (max (- right-space (length right)) 1 0)))
+;;           (concat left (make-string lspaces  ?\s)
+;;                   center
+;;                   (make-string rspaces ?\s)
+;;                   right)))
+;;     (error (format "[%s]: (%s) (%s) (%s)" err left center right))))
+;; (defvar custom-mode-line-format
+;;   '((:eval (custom-mode-line-render
+;;             (downcase (format-mode-line mode-name))
+;;             (buffer-name)
+;;             (nyan-create) 
+;;             1 1))))
+(defun mode-line-fill-right (face reserve)
+  "Return empty space using FACE and leaving RESERVE space on the right."
+  (unless reserve
+    (setq reserve 20))
+  (when (and window-system (eq 'right (get-scroll-bar-mode)))
+    (setq reserve (- reserve 3)))
+  (propertize " "
+              'display `((space :align-to (- (+ right right-fringe right-margin) ,reserve)))
+              'face face))
+
+(defun mode-line-fill-center (face reserve)
+  "Return empty space using FACE to the center of remaining space leaving RESERVE space on the right."
+  (unless reserve
+    (setq reserve 20))
+  (when (and window-system (eq 'right (get-scroll-bar-mode)))
+    (setq reserve (- reserve 3)))
+  (propertize " "
+              'display `((space :align-to (- (+ center (.5 . right-margin)) ,reserve
+                                             (.5 . left-margin))))
+              'face face))
+
+(defconst RIGHT_PADDING 1)
+
+(defun reserve-left/middle ()
+  (/ (length (format-mode-line mode-line-align-middle)) 2))
+(defun reserve-middle/right ()
+  (+ RIGHT_PADDING (length (format-mode-line mode-line-align-right))))
+
+;; (defvar your-custom-mode-line-format
+;;   '((:eval (jordon-fancy-mode-line-render
+;;             (downcase (format-mode-line mode-name))
+;;             (buffer-name)
+;;             (nyan-create) 
+;;             1 1))))
+;; (defvar jordon-mode-line-format
+;;   '((:eval (jordon-fancy-mode-line-render
+;;             (format-mode-line (format " %s (%%l/%d) %%c "
+;;                                       (downcase (format-mode-line mode-name))
+;;                                       (line-number-at-pos (point-max))))
+;;             (concat (buffer-name)
+;;                     (cond
+;;                      ((not (buffer-file-name)) " ")
+;;                      ((buffer-modified-p) "*")
+;;                      (t " ")))
+;;             " " 1 3))))
+;; (defun jordon-fancy-mode-line-render (left center right &optional lpad rpad)
+;;   "Return a string the width of the current window with 
+;; LEFT, CENTER, and RIGHT spaced out accordingly, LPAD and RPAD,
+;; can be used to add a number of spaces to the front and back of the string."
+;;   (condition-case err
+;;       (let* ((left (if lpad (concat (make-string lpad ?\s) left) left))
+;;              (right (if rpad (concat right (make-string rpad ?\s)) right))
+;;              (width (apply '+ (window-width) (let ((m (window-margins))) (list (or (car m) 0) (or (cdr m) 0)))))
+;;              (total-length (+ (length left) (length center) (length right) 2)))
+;;         (when (> total-length width) (setq left "" right ""))
+;;         (let* ((left-space (/ (- width (length center)) 2))
+;;                (right-space (- width left-space (length center)))
+;;                (lspaces (max (- left-space (length left)) 1))
+;;                (rspaces (max (- right-space (length right)) 1 0)))
+;;           (concat left (make-string lspaces  ?\s)
+;;                   center
+;;                   (make-string rspaces ?\s)
+;;                   right)))
+;;     (error (format "[%s]: (%s) (%s) (%s)" err left center right))))
 
 
 (message "Successfully loaded config... ")
