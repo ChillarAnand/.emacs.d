@@ -1,0 +1,10 @@
+/.mc-lists.el
+/.private.el
+.sx/
+auto-save-list
+elpa
+/hgs-cache
+/recentf
+/saveplace.el
+semanticdb
+session.*

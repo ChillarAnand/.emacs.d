@@ -254,8 +254,6 @@
     (edit-server-start)))
 
 
-
-
 (use-package multi-term
   :config
   (setq multi-term-program "/bin/zsh")
@@ -410,14 +408,6 @@
   (require 'google-translate-default-ui))
 
 
-;; (use-package slime
-;;   :init
-;;   (progn
-;;     (setq inferior-lisp-program "/usr/bin/sbcl")
-;;     (setq slime-contribs '(slime-fancy))
-;;     (add-to-list 'slime-contribs 'slime-repl)))
-
-
 (use-package ace-link
   :config
   (ace-link-setup-default))
@@ -509,21 +499,7 @@
 
 
 (require 'sql)
-<<<<<<< HEAD
-;; (load-file (expand-file-name "mysql.el" package-vendor-dir))
-;; (require 'mysql)
-;; (use-package sqlup-mode
-;;   :config
-;;   (add-hook 'sql-mode-hook 'sqlup-mode))
-(progn  
-=======
-(load-file (expand-file-name "mysql.el" package-vendor-dir))
-(require 'mysql)
-(use-package sqlup-mode
-  :config
-  (add-hook 'sql-mode-hook 'sqlup-mode))
 (progn
->>>>>>> fa145dc9e7d956ff0077f5eba749b7c269741c10
   (sql-set-product "mysql")
   (setq sql-port 3306)
   (setq sql-connection-alist
@@ -561,147 +537,7 @@
     (sql-send-paragraph)
     (with-current-buffer (process-buffer (get-process "SQL"))
       (set-window-point (get-buffer-window (current-buffer))
-                        (point-max))))
-  ;; (add-hook 'sql-interactive-mode-hook
-  ;;           (lambda ()
-  ;;             (toggle-truncate-lines t))
-  ;; 	    )
-
-  (define-key sql-mode-map (kbd "C-c C-c") 'mysql-send-paragraph))
-
-
-;; (load-file "~/projects/lisp/real-auto-save/real-auto-save.el")
-;; (add-hook 'prog-mode-hook 'real-auto-save-mode)
-;; (setq real-auto-save-interval 4)
-
-
-;; (use-package phi-search
-;;   :init
-;;   (global-set-key (kbd "C-s") 'phi-search))
-
-;; (use-package circe
-;;   :init
-;;   (setq circe-network-options
-;;         `(("Freenode"
-;;            :nick "chillaranand"
-;;            :channels
-;;            ("#emacs" "#emacs-circe" "#emacs-elpy"
-;;             "#python-india" "#python-dev"
-;;             "#dgplug")
-;;            :nickserv-password ,freenode-password)))
-;;   (setq circe-reduce-lurker-spam t))
-
-
-;; (require 'emmet-mode)
-;; (add-hook 'sgml-mode-hook 'emmet-mode)
-;; (add-hook 'html-mode-hook 'emmet-mode)
-;; (add-hook 'css-mode-hook  'emmet-mode)
-
-;; (use-package zencoding-mode)
-;; (add-hook 'html-mode-hook 'zencoding-mode)
-
-
-;; (use-package soundcloud
-;;   :config
-;;   (require 'emms-setup)
-;;   (emms-standard)
-;;   (emms-default-players))
-
-;; (use-package elpy)
-;; (add-to-list 'load-path "~/projects/lisp/elpy")
-;; (load "elpy" nil t)
-;; (elpy-enable)
-
-
-;; (use-package wakatime-mode
-;;   :config
-;;   (setq wakatime-python-bin "/usr/local/bin/wakatime")
-;;   (global-wakatime-mode))
-
-
-<<<<<<< HEAD
-;; (use-package pony-mode
-;;   :ensure t
-;;   :config
-;;   (setq pony-server-host "127.0.0.1")
-;;   (add-hook 'python-mode-hook 'pony-mode))
-
-;; (use-package ws-butler
-;;   :config
-;;   (ws-butler-global-mode))
-
-=======
-;; (require 'company)
-;; (require 'company-web-html)
-;; (add-to-list 'company-backends 'company-web-html)
-
-;; (define-key web-mode-map (kbd "C-'") 'company-web-html)
-;; (add-hook 'web-mode-hook (lambda ()
-;;                            (set (make-local-variable 'company-backends) '(company-web-html company-files))
-;;                            (company-mode t)))
-
-
-;; (use-package elisp-slime-nav
-;;   :init
-;;   (progn
-;;     (dolist (hook '(emacs-lisp-mode-hook ielm-mode-hook))
-;;       (add-hook hook 'turn-on-elisp-slime-nav-mode))
-;;     (global-set-key (kbd "C-c C-d") 'elisp-slime-nav-describe-elisp-thing-at-point)))
-
-
-
-;; (load-file "~/.emacs.d/vendor/sql-completion.el")
-;; (require 'sql-completion)
-;; (setq sql-interactive-mode-hook
-;;       (lambda ()
-;;         (define-key sql-interactive-mode-map "\t" 'comint-dynamic-complete)
-;;         (sql-mysql-completion-init)))
-
-
-
-
-;; (use-package soundcloud
-;;   :config
-;;   (require 'emms-setup)
-;;   (emms-standard)
-;;   (emms-default-players))
-
-;; (use-package elpy)
-;; (add-to-list 'load-path "~/projects/lisp/elpy")
-;; (load "elpy" nil t)
-;; (elpy-enable)
-
-
-;; (use-package electric-case
-;;   :config
-;;   (defun electric-case-python-init ()
-
-;;     (electric-case-mode 1)
-;;     (setq electric-case-max-iteration 2)
-
-;;     (setq electric-case-criteria
-;;           (lambda (b e)
-;;             (let ((proper (electric-case--possible-properties b e))
-;;                   (key (key-description (this-single-command-keys))))
-;;               (cond
-;;                ((member 'font-lock-variable-name-face proper)
-;;                 ;; #ifdef A_MACRO  /  int variable_name;
-;;                 (if (member '(cpp-macro) (python-guess-basic-syntax)) 'usnake 'snake))
-;;                ((member 'font-lock-string-face proper) nil)
-;;                ((member 'font-lock-comment-face proper) nil)
-;;                ((member 'font-lock-keyword-face proper) nil)
-;;                ((member 'font-lock-function-name-face proper) 'snake)
-;;                ((member 'font-lock-type-face proper) 'snake)
-;;                (electric-case-convert-calls 'snake)
-;;                (t nil)))))
-
-;;     (defadvice electric-case-trigger (around electric-case-c-try-semi activate)
-;;       (when (and electric-case-mode
-;;                  (eq major-mode 'python-mode)))))
-
-;;   (add-hook 'python-mode-hook 'electric-case-python-init)
-;;   (setq electric-case-convert-calls t))
->>>>>>> fa145dc9e7d956ff0077f5eba749b7c269741c10
+                        (point-max)))))
 
 
 
@@ -716,23 +552,6 @@
       (recenter 0))
     result))
 (advice-add 'help-button-action :around #'my-recenter-on-find-function)
-
-(defun retain-point-stage (orig &rest args)
-  (message "foo")
-  (let ((pos (point))
-	(result (apply orig args)))
-    (when result)
-    (message "foo")
-    (goto-char pos)
-    result))
-(advice-add 'magit-stage-file :before #'retain-point-stage)
-(advice-add 'magit-stage-file :around #'retain-point-stage)
-
-
-;; suppress file save messages
-;; (defun my-auto-save-wrapper (save-fn &rest args)
-;;   (apply save-fn '(t)))
-;; (advice-add 'save-buffer :around #'my-auto-save-wrapper)
 
 
 (defun delete-whole-line (&optional arg)
@@ -962,13 +781,13 @@ With a prefix argument N, (un)comment that many sexps."
   "Active space2cctl."
   (interactive)
   (async-shell-command "s2cctl start"))
-(start-space-to-ctrl)
 
 (defun stop-space-to-ctrl ()
   "Active space2cctl."
   (interactive)
   (async-shell-command "s2cctl stop"))
 
+(start-space-to-ctrl)
 
 
 
@@ -1008,11 +827,7 @@ With a prefix argument N, (un)comment that many sexps."
  ("M-?" . mark-paragraph)
  ("M-/" . hippie-expand))
 
-;; Start proced in a similar manner to dired
-(unless (eq system-type 'darwin)
-  (global-set-key (kbd "C-x p") 'proced))
-
-(define-key emacs-lisp-mode-map (kbd "C-M-;")
+(define-key emacs-lisp-mode-map (kbd "C-;")
   #'comment-or-uncomment-sexp)
 
 ;; kill lines backward
@@ -1051,6 +866,7 @@ With a prefix argument N, (un)comment that many sexps."
 (helm-descbinds-mode)
 (helm-mode 1)
 
+
 ;; enable Helm version of Projectile with replacment commands
 (helm-projectile-on)
 
@@ -1083,99 +899,6 @@ With a prefix argument N, (un)comment that many sexps."
 (key-chord-define-global "pf" 'helm-projectile-find-file)
 (key-chord-define-global "pg" 'helm-projectile-grep)
 (key-chord-define-global "sm" 'set-mark-command)
-
-
-
-;; test
-;; (defun custom-mode-line-render (left center right &optional lpad rpad)
-;;   "Return a string the width of the current window with 
-;; LEFT, CENTER, and RIGHT spaced out accordingly, LPAD and RPAD,
-;; can be used to add a number of spaces to the front and back of the string."
-;;   (condition-case err
-;;       (let* ((left (if lpad (concat (make-string lpad ?\s) left) left))
-;;              (right (if rpad (concat right (make-string rpad ?\s)) right))
-;;              (width (apply '+ (window-width) (let ((m (window-margins))) (list (or (car m) 0) (or (cdr m) 0)))))
-;;              (total-length (+ (length left) (length center) (length right) 2)))
-;;         (when (> total-length width) (setq left "" right ""))
-;;         (let* ((left-space (/ (- width (length center)) 2))
-;;                (right-space (- width left-space (length center)))
-;;                (lspaces (max (- left-space (length left)) 1))
-;;                (rspaces (max (- right-space (length right)) 1 0)))
-;;           (concat left (make-string lspaces  ?\s)
-;;                   center
-;;                   (make-string rspaces ?\s)
-;;                   right)))
-;;     (error (format "[%s]: (%s) (%s) (%s)" err left center right))))
-;; (defvar custom-mode-line-format
-;;   '((:eval (custom-mode-line-render
-;;             (downcase (format-mode-line mode-name))
-;;             (buffer-name)
-;;             (nyan-create) 
-;;             1 1))))
-(defun mode-line-fill-right (face reserve)
-  "Return empty space using FACE and leaving RESERVE space on the right."
-  (unless reserve
-    (setq reserve 20))
-  (when (and window-system (eq 'right (get-scroll-bar-mode)))
-    (setq reserve (- reserve 3)))
-  (propertize " "
-              'display `((space :align-to (- (+ right right-fringe right-margin) ,reserve)))
-              'face face))
-
-(defun mode-line-fill-center (face reserve)
-  "Return empty space using FACE to the center of remaining space leaving RESERVE space on the right."
-  (unless reserve
-    (setq reserve 20))
-  (when (and window-system (eq 'right (get-scroll-bar-mode)))
-    (setq reserve (- reserve 3)))
-  (propertize " "
-              'display `((space :align-to (- (+ center (.5 . right-margin)) ,reserve
-                                             (.5 . left-margin))))
-              'face face))
-
-(defconst RIGHT_PADDING 1)
-
-(defun reserve-left/middle ()
-  (/ (length (format-mode-line mode-line-align-middle)) 2))
-(defun reserve-middle/right ()
-  (+ RIGHT_PADDING (length (format-mode-line mode-line-align-right))))
-
-;; (defvar your-custom-mode-line-format
-;;   '((:eval (jordon-fancy-mode-line-render
-;;             (downcase (format-mode-line mode-name))
-;;             (buffer-name)
-;;             (nyan-create) 
-;;             1 1))))
-;; (defvar jordon-mode-line-format
-;;   '((:eval (jordon-fancy-mode-line-render
-;;             (format-mode-line (format " %s (%%l/%d) %%c "
-;;                                       (downcase (format-mode-line mode-name))
-;;                                       (line-number-at-pos (point-max))))
-;;             (concat (buffer-name)
-;;                     (cond
-;;                      ((not (buffer-file-name)) " ")
-;;                      ((buffer-modified-p) "*")
-;;                      (t " ")))
-;;             " " 1 3))))
-;; (defun jordon-fancy-mode-line-render (left center right &optional lpad rpad)
-;;   "Return a string the width of the current window with 
-;; LEFT, CENTER, and RIGHT spaced out accordingly, LPAD and RPAD,
-;; can be used to add a number of spaces to the front and back of the string."
-;;   (condition-case err
-;;       (let* ((left (if lpad (concat (make-string lpad ?\s) left) left))
-;;              (right (if rpad (concat right (make-string rpad ?\s)) right))
-;;              (width (apply '+ (window-width) (let ((m (window-margins))) (list (or (car m) 0) (or (cdr m) 0)))))
-;;              (total-length (+ (length left) (length center) (length right) 2)))
-;;         (when (> total-length width) (setq left "" right ""))
-;;         (let* ((left-space (/ (- width (length center)) 2))
-;;                (right-space (- width left-space (length center)))
-;;                (lspaces (max (- left-space (length left)) 1))
-;;                (rspaces (max (- right-space (length right)) 1 0)))
-;;           (concat left (make-string lspaces  ?\s)
-;;                   center
-;;                   (make-string rspaces ?\s)
-;;                   right)))
-;;     (error (format "[%s]: (%s) (%s) (%s)" err left center right))))
 
 
 (message "Successfully loaded config... ")
