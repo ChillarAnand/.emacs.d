@@ -40,6 +40,13 @@
 (load-file (expand-file-name ".private.el" root-dir))
 
 
+;; confirm before killing emacs
+(setq confirm-kill-emacs
+      (lambda (&rest args)
+        (interactive)
+        (null (read-event "Quitting in 3 seconds. Hit any key to stop."
+                          nil 3))))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; ui config
@@ -82,10 +89,10 @@
 ;; set frame title
 (setq frame-title-format
       '("" invocation-name
-	" Avil Page - "
-	(:eval (if (buffer-file-name)
-		   (abbreviate-file-name (buffer-file-name))
-		 "%b"))))
+        " Avil Page - "
+        (:eval (if (buffer-file-name)
+                   (abbreviate-file-name (buffer-file-name))
+                 "%b"))))
 
 
 
@@ -93,11 +100,13 @@
 ;; Packages
 
 ;; add melpa to archives
+(add-to-list 'package-archives
+             '("melpa" . "http://melpa.org/packages/") t)
+
+;; add melpa to archives
 (defun install-packages (switch)
   "Refresh package contents if -i switch is passed."
   (message "-i was passed. refreshing package contents")
-  (add-to-list 'package-archives
-	       '("melpa" . "http://melpa.org/packages/") t)
   (package-refresh-contents)
   ;; install use package
   (unless (package-installed-p 'use-package)
@@ -197,19 +206,23 @@
 
 
 (use-package web-mode
-  :init
+  :config
   (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
   (setq web-mode-engines-alist '(("django" . "\\.html\\'")))
+
+  (setq-default indent-tabs-mode nil)
   (setq web-mode-markup-indent-offset 4)
   (setq web-mode-code-indent-offset 4)
   (setq web-mode-css-indent-offset 4)
   (setq web-mode-js-indent-offset 0)
+
   (setq web-mode-script-padding 0)
-  (setq web-mode-enable-auto-pairing t)
   (setq web-mode-enable-auto-expanding t)
   (setq web-mode-enable-css-colorization t)
   (setq web-mode-enable-auto-pairing nil)
+
   (set (make-local-variable 'company-backends) '(company-css))
+
   (bind-key "C-c C-i" 'web-mode-buffer-indent))
 
 
@@ -254,36 +267,6 @@
 (use-package free-keys)
 
 
-(use-package electric-case
-  :config
-  (defun electric-case-python-init ()
-
-    (electric-case-mode 1)
-    (setq electric-case-max-iteration 2)
-
-    (setq electric-case-criteria
-	  (lambda (b e)
-	    (let ((proper (electric-case--possible-properties b e))
-		  (key (key-description (this-single-command-keys))))
-	      (cond
-	       ((member 'font-lock-variable-name-face proper)
-		;; #ifdef A_MACRO  /  int variable_name;
-		(if (member '(cpp-macro) (python-guess-basic-syntax)) 'usnake 'snake))
-	       ((member 'font-lock-string-face proper) nil)
-	       ((member 'font-lock-comment-face proper) nil)
-	       ((member 'font-lock-keyword-face proper) nil)
-	       ((member 'font-lock-function-name-face proper) 'snake)
-	       ((member 'font-lock-type-face proper) 'snake)
-	       (electric-case-convert-calls 'snake)
-	       (t nil)))))
-
-    (defadvice electric-case-trigger (around electric-case-c-try-semi activate)
-      (when (and electric-case-mode
-		 (eq major-mode 'python-mode)))))
-
-  (add-hook 'python-mode-hook 'electric-case-python-init)
-  (setq electric-case-convert-calls t))
-
 
 (use-package smart-mode-line
   :config
@@ -317,22 +300,22 @@
   (openwith-mode t)
   (setq large-file-warning-threshold 500000000)
   (setq openwith-associations
-	(list (list (openwith-make-extension-regexp '("pdf"))
-		    "evince" '(file))
-	      (list (openwith-make-extension-regexp '("flac" "mp3" "wav"))
-		    "vlc" '(file))
-	      (list (openwith-make-extension-regexp
-		     '("avi" "flv" "mov" "mp4" "mkv" "mpeg" "mpg" "ogg" "wmv"))
-		    "vlc" '(file))
-	      (list (openwith-make-extension-regexp '("bmp" "jpeg" "jpg" "png"))
-		    "ristretto" '(file))
-	      (list (openwith-make-extension-regexp '("doc" "docx" "odt"))
-		    "libreoffice" '("--writer" file))
-	      (list (openwith-make-extension-regexp '("ods" "xls" "xlsx"))
-		    "libreoffice" '("--calc" file))
-	      (list (openwith-make-extension-regexp '("odp" "pps" "ppt" "pptx"))
-		    "libreoffice" '("--impress" file))
-	      )))
+        (list (list (openwith-make-extension-regexp '("pdf"))
+                    "evince" '(file))
+              (list (openwith-make-extension-regexp '("flac" "mp3" "wav"))
+                    "vlc" '(file))
+              (list (openwith-make-extension-regexp
+                     '("avi" "flv" "mov" "mp4" "mkv" "mpeg" "mpg" "ogg" "wmv"))
+                    "vlc" '(file))
+              (list (openwith-make-extension-regexp '("bmp" "jpeg" "jpg" "png"))
+                    "ristretto" '(file))
+              (list (openwith-make-extension-regexp '("doc" "docx" "odt"))
+                    "libreoffice" '("--writer" file))
+              (list (openwith-make-extension-regexp '("ods" "xls" "xlsx"))
+                    "libreoffice" '("--calc" file))
+              (list (openwith-make-extension-regexp '("odp" "pps" "ppt" "pptx"))
+                    "libreoffice" '("--impress" file))
+              )))
 
 
 (use-package easy-kill
@@ -362,10 +345,10 @@
   (defvar helm-source-emacs-commands
     (helm-build-sync-source "Emacs commands"
       :candidates (lambda ()
-		    (let ((cmds))
-		      (mapatoms
-		       (lambda (elt) (when (commandp elt) (push elt cmds))))
-		      cmds))
+                    (let ((cmds))
+                      (mapatoms
+                       (lambda (elt) (when (commandp elt) (push elt cmds))))
+                      cmds))
       :coerce #'intern-soft
       :action #'command-execute)
     "A simple helm source for Emacs commands.")
@@ -373,33 +356,33 @@
   (defvar helm-source-emacs-commands-history
     (helm-build-sync-source "Emacs commands history"
       :candidates (lambda ()
-		    (let ((cmds))
-		      (dolist (elem extended-command-history)
-			(push (intern elem) cmds))
-		      cmds))
+                    (let ((cmds))
+                      (dolist (elem extended-command-history)
+                        (push (intern elem) cmds))
+                      cmds))
       :coerce #'intern-soft
       :action #'command-execute)
     "Emacs commands history")
 
   (setq helm-mini-default-sources '(helm-source-buffers-list
-				    helm-source-recentf
-				    helm-source-dired-recent-dirs
-				    helm-source-emacs-commands-history
-				    helm-source-emacs-commands
-				    helm-chrome-source
-				    hgs/helm-c-source-stars
-				    hgs/helm-c-source-repos
-				    helm-source-buffer-not-found
-				    hgs/helm-c-source-search))
+                                    helm-source-recentf
+                                    helm-source-dired-recent-dirs
+                                    helm-source-emacs-commands-history
+                                    helm-source-emacs-commands
+                                    helm-chrome-source
+                                    hgs/helm-c-source-stars
+                                    hgs/helm-c-source-repos
+                                    helm-source-buffer-not-found
+                                    hgs/helm-c-source-search))
 
   (setq  helm-ff-newfile-prompt-p              nil
-	 helm-echo-input-in-header-line        t
-	 helm-M-x-always-save-history          t
-	 helm-split-window-in-side-p           t
-	 helm-buffers-fuzzy-matching           t
-	 helm-move-to-line-cycle-in-source     t
-	 helm-ff-search-library-in-sexp        t
-	 helm-ff-file-name-history-use-recentf t))
+         helm-echo-input-in-header-line        t
+         helm-M-x-always-save-history          t
+         helm-split-window-in-side-p           t
+         helm-buffers-fuzzy-matching           t
+         helm-move-to-line-cycle-in-source     t
+         helm-ff-search-library-in-sexp        t
+         helm-ff-file-name-history-use-recentf t))
 
 
 ;; swiper for search
@@ -440,16 +423,6 @@
   (ace-link-setup-default))
 
 
-;; (require 'company)
-;; (require 'company-web-html)
-;; (add-to-list 'company-backends 'company-web-html)
-
-;; (define-key web-mode-map (kbd "C-'") 'company-web-html)
-;; (add-hook 'web-mode-hook (lambda ()
-;;                            (set (make-local-variable 'company-backends) '(company-web-html company-files))
-;;                            (company-mode t)))
-
-
 (use-package writegood-mode)
 (use-package writeroom-mode)
 (use-package sotlisp)
@@ -458,15 +431,6 @@
 (use-package benchmark-init
   :config
   (benchmark-init/activate))
-
-
-;; (use-package elisp-slime-nav
-;;   :init
-;;   (progn
-;;     (dolist (hook '(emacs-lisp-mode-hook ielm-mode-hook))
-;;       (add-hook hook 'turn-on-elisp-slime-nav-mode))
-;;     (global-set-key (kbd "C-c C-d") 'elisp-slime-nav-describe-elisp-thing-at-point)))
-
 
 (use-package auto-capitalize
   :config
@@ -527,7 +491,7 @@
 ;; unzip zipped file dired
 (eval-after-load "dired-aux"
   '(add-to-list 'dired-compress-file-suffixes
-		'("\\.zip\\'" ".zip" "unzip")))
+                '("\\.zip\\'" ".zip" "unzip")))
 
 (use-package dired+
   :config)
@@ -539,31 +503,32 @@
     '(custom-set-variables
       '(flycheck-display-errors-function #'flycheck-pos-tip-error-messages))))
 
-
-;; (load-file "~/.emacs.d/vendor/sql-completion.el")
-;; (require 'sql-completion)
-;; (setq sql-interactive-mode-hook
-;;       (lambda ()
-;;         (define-key sql-interactive-mode-map "\t" 'comint-dynamic-complete)
-;;         (sql-mysql-completion-init)))
-
 (use-package lispy
   :config
   (add-hook 'emacs-lisp-mode-hook (lambda () (lispy-mode 1))))
 
 
 (require 'sql)
+<<<<<<< HEAD
 ;; (load-file (expand-file-name "mysql.el" package-vendor-dir))
 ;; (require 'mysql)
 ;; (use-package sqlup-mode
 ;;   :config
 ;;   (add-hook 'sql-mode-hook 'sqlup-mode))
 (progn  
+=======
+(load-file (expand-file-name "mysql.el" package-vendor-dir))
+(require 'mysql)
+(use-package sqlup-mode
+  :config
+  (add-hook 'sql-mode-hook 'sqlup-mode))
+(progn
+>>>>>>> fa145dc9e7d956ff0077f5eba749b7c269741c10
   (sql-set-product "mysql")
   (setq sql-port 3306)
   (setq sql-connection-alist
         '(
-	  (pool-server
+          (pool-server
            (sql-server sql-server-address)
            (sql-user sql-server-user)
            (sql-password sql-server-password)
@@ -654,6 +619,7 @@
 ;;   (global-wakatime-mode))
 
 
+<<<<<<< HEAD
 ;; (use-package pony-mode
 ;;   :ensure t
 ;;   :config
@@ -664,6 +630,78 @@
 ;;   :config
 ;;   (ws-butler-global-mode))
 
+=======
+;; (require 'company)
+;; (require 'company-web-html)
+;; (add-to-list 'company-backends 'company-web-html)
+
+;; (define-key web-mode-map (kbd "C-'") 'company-web-html)
+;; (add-hook 'web-mode-hook (lambda ()
+;;                            (set (make-local-variable 'company-backends) '(company-web-html company-files))
+;;                            (company-mode t)))
+
+
+;; (use-package elisp-slime-nav
+;;   :init
+;;   (progn
+;;     (dolist (hook '(emacs-lisp-mode-hook ielm-mode-hook))
+;;       (add-hook hook 'turn-on-elisp-slime-nav-mode))
+;;     (global-set-key (kbd "C-c C-d") 'elisp-slime-nav-describe-elisp-thing-at-point)))
+
+
+
+;; (load-file "~/.emacs.d/vendor/sql-completion.el")
+;; (require 'sql-completion)
+;; (setq sql-interactive-mode-hook
+;;       (lambda ()
+;;         (define-key sql-interactive-mode-map "\t" 'comint-dynamic-complete)
+;;         (sql-mysql-completion-init)))
+
+
+
+
+;; (use-package soundcloud
+;;   :config
+;;   (require 'emms-setup)
+;;   (emms-standard)
+;;   (emms-default-players))
+
+;; (use-package elpy)
+;; (add-to-list 'load-path "~/projects/lisp/elpy")
+;; (load "elpy" nil t)
+;; (elpy-enable)
+
+
+;; (use-package electric-case
+;;   :config
+;;   (defun electric-case-python-init ()
+
+;;     (electric-case-mode 1)
+;;     (setq electric-case-max-iteration 2)
+
+;;     (setq electric-case-criteria
+;;           (lambda (b e)
+;;             (let ((proper (electric-case--possible-properties b e))
+;;                   (key (key-description (this-single-command-keys))))
+;;               (cond
+;;                ((member 'font-lock-variable-name-face proper)
+;;                 ;; #ifdef A_MACRO  /  int variable_name;
+;;                 (if (member '(cpp-macro) (python-guess-basic-syntax)) 'usnake 'snake))
+;;                ((member 'font-lock-string-face proper) nil)
+;;                ((member 'font-lock-comment-face proper) nil)
+;;                ((member 'font-lock-keyword-face proper) nil)
+;;                ((member 'font-lock-function-name-face proper) 'snake)
+;;                ((member 'font-lock-type-face proper) 'snake)
+;;                (electric-case-convert-calls 'snake)
+;;                (t nil)))))
+
+;;     (defadvice electric-case-trigger (around electric-case-c-try-semi activate)
+;;       (when (and electric-case-mode
+;;                  (eq major-mode 'python-mode)))))
+
+;;   (add-hook 'python-mode-hook 'electric-case-python-init)
+;;   (setq electric-case-convert-calls t))
+>>>>>>> fa145dc9e7d956ff0077f5eba749b7c269741c10
 
 
 
@@ -689,6 +727,12 @@
     result))
 (advice-add 'magit-stage-file :before #'retain-point-stage)
 (advice-add 'magit-stage-file :around #'retain-point-stage)
+
+
+;; suppress file save messages
+;; (defun my-auto-save-wrapper (save-fn &rest args)
+;;   (apply save-fn '(t)))
+;; (advice-add 'save-buffer :around #'my-auto-save-wrapper)
 
 
 (defun delete-whole-line (&optional arg)
@@ -731,6 +775,15 @@ Repeated invocations toggle between the two most recently open buffers."
   (define-key key-translation-map (kbd "9") (kbd "("))
   (define-key key-translation-map (kbd "0") (kbd ")")))
 
+(defun swap-numbers-parens ()
+  "( -> 9 and ) -> 0"
+  (interactive)
+  (define-key key-translation-map (kbd "(") (kbd "9"))
+  (define-key key-translation-map (kbd ")") (kbd "0"))
+  (define-key key-translation-map (kbd "9") (kbd "("))
+  (define-key key-translation-map (kbd "0") (kbd ")")))
+(swap-numbers-parens)
+
 
 (defun current-dired ()
   (interactive)
@@ -753,10 +806,10 @@ Repeated invocations toggle between the two most recently open buffers."
   ;; We need the new emacs to be spawned after all kill-emacs-hooks
   ;; have been processed and there is nothing interesting left
   (add-hook 'kill-emacs-hook
-	    (if (display-graphic-p)
-		#'launch-separate-emacs-under-x
-	      #'launch-separate-emacs-in-terminal)
-	    t)
+            (if (display-graphic-p)
+                #'launch-separate-emacs-under-x
+              #'launch-separate-emacs-in-terminal)
+            t)
   (kill-emacs))
 
 (defun get-positions-of-line-or-region ()
@@ -764,10 +817,10 @@ Repeated invocations toggle between the two most recently open buffers."
 or region."
   (let (beg end)
     (if (and mark-active (> (point) (mark)))
-	(exchange-point-and-mark))
+        (exchange-point-and-mark))
     (setq beg (line-beginning-position))
     (if mark-active
-	(exchange-point-and-mark))
+        (exchange-point-and-mark))
     (setq end (line-end-position))
     (cons beg end)))
 
@@ -778,14 +831,14 @@ If there's no region, the current line will be duplicated.  However, if
 there's a region, all lines that region covers will be duplicated."
   (interactive "p")
   (pcase-let* ((origin (point))
-	       (`(,beg . ,end) (get-positions-of-line-or-region))
-	       (region (buffer-substring-no-properties beg end)))
+               (`(,beg . ,end) (get-positions-of-line-or-region))
+               (region (buffer-substring-no-properties beg end)))
     (-dotimes arg
       (lambda (n)
-	(goto-char end)
-	(newline)
-	(insert region)
-	(setq end (point))))
+        (goto-char end)
+        (newline)
+        (insert region)
+        (setq end (point))))
     (goto-char (+ origin (* (length region) arg) arg))))
 
 
@@ -817,51 +870,51 @@ point reaches the beginning or end of the buffer, stop there."
   "Uncomment a sexp around point."
   (interactive "P")
   (let* ((initial-point (point-marker))
-	 (p)
-	 (end (save-excursion
-		(when (elt (syntax-ppss) 4)
-		  (re-search-backward comment-start-skip
-				      (line-beginning-position)
-				      t))
-		(setq p (point-marker))
-		(comment-forward (point-max))
-		(point-marker)))
-	 (beg (save-excursion
-		(forward-line 0)
-		(while (= end (save-excursion
-				(comment-forward (point-max))
-				(point)))
-		  (forward-line -1))
-		(goto-char (line-end-position))
-		(re-search-backward comment-start-skip
-				    (line-beginning-position)
-				    t)
-		(while (looking-at-p comment-start-skip)
-		  (forward-char -1))
-		(point-marker))))
+         (p)
+         (end (save-excursion
+                (when (elt (syntax-ppss) 4)
+                  (re-search-backward comment-start-skip
+                                      (line-beginning-position)
+                                      t))
+                (setq p (point-marker))
+                (comment-forward (point-max))
+                (point-marker)))
+         (beg (save-excursion
+                (forward-line 0)
+                (while (= end (save-excursion
+                                (comment-forward (point-max))
+                                (point)))
+                  (forward-line -1))
+                (goto-char (line-end-position))
+                (re-search-backward comment-start-skip
+                                    (line-beginning-position)
+                                    t)
+                (while (looking-at-p comment-start-skip)
+                  (forward-char -1))
+                (point-marker))))
     (unless (= beg end)
       (uncomment-region beg end)
       (goto-char p)
       ;; Indentify the "top-level" sexp inside the comment.
       (while (and (ignore-errors (backward-up-list) t)
-		  (>= (point) beg))
-	(skip-chars-backward (rx (syntax expression-prefix)))
-	(setq p (point-marker)))
+                  (>= (point) beg))
+        (skip-chars-backward (rx (syntax expression-prefix)))
+        (setq p (point-marker)))
       ;; Re-comment everything before it.
       (ignore-errors
-	(comment-region beg p))
+        (comment-region beg p))
       ;; And everything after it.
       (goto-char p)
       (forward-sexp (or n 1))
       (skip-chars-forward "\r\n[:blank:]")
       (if (< (point) end)
-	  (ignore-errors
-	    (comment-region (point) end))
-	;; If this is a closing delimiter, pull it up.
-	(goto-char end)
-	(skip-chars-forward "\r\n[:blank:]")
-	(when (= 5 (car (syntax-after (point))))
-	  (delete-indentation))))
+          (ignore-errors
+            (comment-region (point) end))
+        ;; If this is a closing delimiter, pull it up.
+        (goto-char end)
+        (skip-chars-forward "\r\n[:blank:]")
+        (when (= 5 (car (syntax-after (point))))
+          (delete-indentation))))
     ;; Without a prefix, it's more useful to leave point where
     ;; it was.
     (unless n
@@ -870,9 +923,9 @@ point reaches the beginning or end of the buffer, stop there."
 (defun comment-sexp--raw ()
   "Comment the sexp at point or ahead of point."
   (pcase (or (bounds-of-thing-at-point 'sexp)
-	     (save-excursion
-	       (skip-chars-forward "\r\n[:blank:]")
-	       (bounds-of-thing-at-point 'sexp)))
+             (save-excursion
+               (skip-chars-forward "\r\n[:blank:]")
+               (bounds-of-thing-at-point 'sexp)))
     (`(,l . ,r)
      (goto-char r)
      (skip-chars-forward "\r\n[:blank:]")
@@ -885,15 +938,36 @@ If already inside (or before) a comment, uncomment instead.
 With a prefix argument N, (un)comment that many sexps."
   (interactive "P")
   (if (or (elt (syntax-ppss) 4)
-	  (< (save-excursion
-	       (skip-chars-forward "\r\n[:blank:]")
-	       (point))
-	     (save-excursion
-	       (comment-forward 1)
-	       (point))))
+          (< (save-excursion
+               (skip-chars-forward "\r\n[:blank:]")
+               (point))
+             (save-excursion
+               (comment-forward 1)
+               (point))))
       (uncomment-sexp n)
     (dotimes (_ (or n 1))
       (comment-sexp--raw))))
+
+
+(defun upgrade-all-packages ()
+  "Upgrade all packages, no questions asked."
+  (interactive)
+  (save-window-excursion
+    (package-list-packages)
+    (package-menu-mark-upgrades)
+    (package-menu-execute 'no-query)))
+
+
+(defun start-space-to-ctrl ()
+  "Active space2cctl."
+  (interactive)
+  (async-shell-command "s2cctl start"))
+(start-space-to-ctrl)
+
+(defun stop-space-to-ctrl ()
+  "Active space2cctl."
+  (interactive)
+  (async-shell-command "s2cctl stop"))
 
 
 
@@ -923,8 +997,8 @@ With a prefix argument N, (un)comment that many sexps."
  ("C-c C-f" . helm-projectile-find-file)
  ("C-c C-g" . beginning-of-buffer)
  ("C-c C-k" . delete-other-windows)
- ("C-c C-v" . eval-buffer) 
- 
+ ("C-c C-v" . eval-buffer)
+
  ("M-h" . backward-kill-word)
  ("M-o" . other-window)
  ("M-x" . helm-M-x)
@@ -943,19 +1017,19 @@ With a prefix argument N, (un)comment that many sexps."
 
 ;; kill lines backward
 (global-set-key (kbd "C-<backspace>") (lambda ()
-					(interactive)
-					(kill-line 0)
-					(indent-according-to-mode)))
+                                        (interactive)
+                                        (kill-line 0)
+                                        (indent-according-to-mode)))
 
-;; (global-set-key [remap kill-whole-line] 'delete-whole-line)
+(global-set-key [remap kill-whole-line] 'delete-whole-line)
 
 ;; Activate occur easily inside isearch
 (define-key isearch-mode-map (kbd "C-o")
   (lambda () (interactive)
     (let ((case-fold-search isearch-case-fold-search))
       (occur (if isearch-regexp
-		 isearch-string
-	       (regexp-quote isearch-string))))))
+                 isearch-string
+               (regexp-quote isearch-string))))))
 
 (unless (fboundp 'toggle-frame-fullscreen)
   (global-set-key (kbd "<f11>") 'prelude-fullscreen))
@@ -969,8 +1043,8 @@ With a prefix argument N, (un)comment that many sexps."
 
 ;; use helm to list eshell history
 (add-hook 'eshell-mode-hook
-	  #'(lambda ()
-	      (substitute-key-definition 'eshell-list-history 'helm-eshell-history eshell-mode-map)))
+          #'(lambda ()
+              (substitute-key-definition 'eshell-list-history 'helm-eshell-history eshell-mode-map)))
 
 (substitute-key-definition 'find-tag 'helm-etags-select global-map)
 (setq projectile-completion-system 'helm)
