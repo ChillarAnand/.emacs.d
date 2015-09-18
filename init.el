@@ -40,7 +40,12 @@
 (load-file (expand-file-name ".private.el" root-dir))
 
 
-(setq confirm-kill-emacs 'y-or-n-p)
+;; confirm before killing emacs
+(setq confirm-kill-emacs
+      (lambda (&rest args)
+        (interactive)
+        (null (read-event "Quitting in 3 seconds. Hit any key to stop."
+                          nil 3))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
