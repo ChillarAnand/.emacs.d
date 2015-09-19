@@ -446,6 +446,10 @@
   :config
   (benchmark-init/activate))
 
+
+(use-package markdown-mode)
+
+
 (use-package auto-capitalize
   :config
   (autoload 'auto-capitalize-mode "auto-capitalize"
@@ -453,9 +457,11 @@
   (autoload 'turn-on-auto-capitalize-mode "auto-capitalize"
     "Turn on `auto-capitalize' minor mode in this buffer." t)
   (autoload 'enable-auto-capitalize-mode "auto-capitalize"
-    "Enable `auto-capitalize' minor mode in this buffer." t))
-
-(require 'markdown-mode)
+    "Enable `auto-capitalize' minor mode in this buffer." t)
+  (defun cap ()
+    (auto-capitalize-mode))
+  (add-hook 'org-mode-hook 'cap)
+  (add-hook 'markdown-mode-hook 'cap))
 
 
 (use-package keyfreq
