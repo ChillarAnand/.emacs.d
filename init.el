@@ -6,8 +6,18 @@
 (require 'cl)
 (require 'package)
 
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; basic config
+
+
+;; set package-user-dir to be relative to ~/.emacs.d/
+(defvar root-dir (file-name-directory load-file-name)
+  "The root dir of the Emacs")
+(setq package-user-dir (expand-file-name "elpa" root-dir))
+(setq package-vendor-dir (expand-file-name "vendor" root-dir))
+(load-file (expand-file-name ".private.el" root-dir))
 
 ;; Always load newest byte code
 (setq load-prefer-newer t)
@@ -32,20 +42,16 @@
 (setq kill-buffer-query-functions
       (delq 'process-kill-buffer-query-function kill-buffer-query-functions))
 
-;; set package-user-dir to be relative to Prelude install path
-(defvar root-dir (file-name-directory load-file-name)
-  "The root dir of the Emacs")
-(setq package-user-dir (expand-file-name "elpa" root-dir))
-(setq package-vendor-dir (expand-file-name "vendor" root-dir))
-(load-file (expand-file-name ".private.el" root-dir))
-
-
 ;; confirm before killing emacs
 (setq confirm-kill-emacs
-      (lambda (&rest args)
-        (interactive)
-        (null (read-event "Quitting in 3 seconds. Hit any key to stop."
-                          nil 3))))
+      (lambda (&rest _)
+        (message "Quit in 3 sec (`C-g' or other action cancels)")
+        (sit-for 3)))
+
+;; always split vertically
+(setq split-height-threshold nil)
+(setq split-width-threshold 0)
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -57,21 +63,22 @@
 ;; remove scroll bar
 (scroll-bar-mode -1)
 
-;; colors
-(set-background-color "#f1f1f1")
-(add-to-list 'default-frame-alist '(background-color . "#f1f1f1"))
-(set-default-font "Ubuntu Mono 13")
-
 ;; disable tool bar
-(when (fboundp 'tool-bar-mode)
-  (tool-bar-mode -1))
+(tool-bar-mode -1)
+
+;; disable menu bar
 (menu-bar-mode -1)
 
-;; the blinking cursor is nothing, but an annoyance
+;; disable blinking
 (blink-cursor-mode -1)
 
 ;; disable startup screen
 (setq inhibit-startup-screen t)
+
+;; set fond & colors
+(set-default-font "Ubuntu Mono 13")
+(set-background-color "#f1f1f1")
+(add-to-list 'default-frame-alist '(background-color . "#f1f1f1"))
 
 ;; nice scrolling
 (setq scroll-margin 0
@@ -81,6 +88,8 @@
 ;; mode line settings
 (line-number-mode t)
 (column-number-mode t)
+
+;; show size in mode line
 ;; (size-indication-mode t)
 
 ;; enable y/n answers
@@ -99,29 +108,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Packages
 
-;; add melpa to archives
-(add-to-list 'package-archives
-             '("melpa" . "http://melpa.org/packages/") t)
-
-;; add melpa to archives
-(defun install-packages (switch)
-  "Refresh package contents if -i switch is passed."
-  (message "-i was passed. refreshing package contents")
-  (package-refresh-contents)
-  ;; install use package
-  (unless (package-installed-p 'use-package)
-    (package-install 'use-package)))
-(add-to-list 'command-switch-alist '("-i" . install-packages))
-
-;; dont check signatures
-(package-initialize)
-(setq package-check-signature nil)
-
-
-;; hide show mode
-(require 'hideshow)
-(global-set-key (kbd "<f2> h h") 'hs-hide-all)
-(global-set-key (kbd "<f2> h j") 'hs-show-all)
 
 ;; save point positions across sessions
 (require 'saveplace)
@@ -134,13 +120,42 @@
 (semantic-mode 1)
 
 
+;; add melpa to archives
+(add-to-list 'package-archives
+             '("melpa" . "http://melpa.org/packages/") t)
+(package-refresh-contents)
+(package-initialize)
+
+;; dont check signatures
+(setq package-check-signature nil)
+
+;; install use package
+(unless (package-installed-p 'use-package)
+  (package-install 'use-package))
 (require 'use-package)
 (setq use-package-always-ensure t)
 
 
+;; dired config
+(require 'dired)
+(setq delete-by-moving-to-trash t)
+(setq dired-no-confirm t)
+(define-key dired-mode-map "u" 'dired-up-directory)
+(setq dired-deletion-confirmer '(lambda (x) t))
+
+(defadvice dired-delete-entry (before force-clean-up-buffers (file) activate)
+  (kill-buffer (get-file-buffer file)))
+
+;; unzip zipped file dired
+(eval-after-load "dired-aux"
+  '(add-to-list 'dired-compress-file-suffixes
+                '("\\.zip\\'" ".zip" "unzip")))
+
+(use-package dired+)
+
+
 (use-package projectile)
 
-(use-package save-sexp)
 
 (use-package smartparens
   :config
@@ -167,7 +182,7 @@
     (elpy-shell-send-region-or-buffer arg)
     (with-current-buffer (process-buffer (elpy-shell-get-or-create-process))
       (set-window-point (get-buffer-window (current-buffer))
-			(point-max))))
+                        (point-max))))
   (define-key elpy-mode-map (kbd "C-c C-c") 'my/send-region-or-buffer))
 
 
@@ -200,9 +215,7 @@
   (define-key company-active-map (kbd "C-p") #'company-select-previous))
 
 
-(use-package header2
-  :init
-  (add-hook 'emacs-lisp-mode-hook 'auto-make-header))
+(use-package header2)
 
 
 (use-package web-mode
@@ -227,7 +240,7 @@
 
 
 (use-package company-quickhelp
-  :init
+  :config
   (company-quickhelp-mode 1))
 
 
@@ -237,13 +250,13 @@
 
 
 (use-package magit
-  :init
+  :config
   (setq magit-status-buffer-switch-function 'switch-to-buffer)
   (setq magit-last-seen-setup-instructions "1.4.0"))
 
 
 (use-package sx
-  :init
+  :config
   (require 'sx-load))
 
 
@@ -265,14 +278,21 @@
 (use-package free-keys)
 
 
-
 (use-package smart-mode-line
   :config
   (setq sml/no-confirm-load-theme t)
   (rich-minority-mode 1)
+  (setq rm-whitelist t)
   (sml/setup)
   (sml/apply-theme 'light))
 
+;; (setq mode-line-format
+;;       '("%e" mode-line-front-space mode-line-mule-info mode-line-client
+;;         mode-line-modified mode-line-remote mode-line-frame-identification
+;;         mode-line-buffer-identification
+;;         (vc-mode vc-mode)
+;;         sml/pre-modes-separator mode-line-modes
+;;         sml/pos-id-separator mode-line-position))
 
 (use-package impatient-mode)
 
@@ -410,11 +430,15 @@
 
 (use-package ace-link
   :config
-  (ace-link-setup-default))
+  (ace-link-setup-default "f"))
 
 
 (use-package writegood-mode)
+
+
 (use-package writeroom-mode)
+
+
 (use-package sotlisp)
 
 
@@ -469,29 +493,12 @@
   (global-hl-line-mode 1))
 
 
-(require 'dired)
-(setq delete-by-moving-to-trash t)
-(setq dired-no-confirm t)
-(define-key dired-mode-map "u" 'dired-up-directory)
-(setq dired-deletion-confirmer '(lambda (x) t))
-
-(defadvice dired-delete-entry (before force-clean-up-buffers (file) activate)
-  (kill-buffer (get-file-buffer file)))
-
-;; unzip zipped file dired
-(eval-after-load "dired-aux"
-  '(add-to-list 'dired-compress-file-suffixes
-                '("\\.zip\\'" ".zip" "unzip")))
-
-(use-package dired+
-  :config)
-
-
 (use-package flycheck-pos-tip
   :config
   (eval-after-load 'flycheck
     '(custom-set-variables
       '(flycheck-display-errors-function #'flycheck-pos-tip-error-messages))))
+
 
 (use-package lispy
   :config
@@ -807,6 +814,7 @@ With a prefix argument N, (un)comment that many sexps."
  ("C-x C-a" . beginning-of-buffer)
  ("C-x C-b" . switch-to-previous-buffer)
  ("C-x C-d" . duplicate-current-line-or-region)
+ ("C-x C-h" . mark-whole-buffer)
  ("C-x C-i" . delete-other-windows)
  ("C-x C-k" . kill-this-buffer)
  ("C-x C-m" . helm-M-x)
