@@ -23,7 +23,7 @@
 (setq load-prefer-newer t)
 
 ;; turn on debug
-(toggle-debug-on-error)
+;; (toggle-debug-on-error)
 
 ;; UTF-8 as default encoding
 (set-language-environment "UTF-8")
@@ -123,7 +123,7 @@
 ;; add melpa to archives
 (add-to-list 'package-archives
              '("melpa" . "http://melpa.org/packages/") t)
-(package-refresh-contents)
+;;(package-refresh-contents)
 (package-initialize)
 
 ;; dont check signatures
@@ -138,20 +138,26 @@
 
 ;; dired config
 (require 'dired)
+(use-package dired+)
+
+;; auto select target as split
+(setq dired-dwim-target t)
+
 (setq delete-by-moving-to-trash t)
 (setq dired-no-confirm t)
 (define-key dired-mode-map "u" 'dired-up-directory)
 (setq dired-deletion-confirmer '(lambda (x) t))
-
-(defadvice dired-delete-entry (before force-clean-up-buffers (file) activate)
-  (kill-buffer (get-file-buffer file)))
 
 ;; unzip zipped file dired
 (eval-after-load "dired-aux"
   '(add-to-list 'dired-compress-file-suffixes
                 '("\\.zip\\'" ".zip" "unzip")))
 
-(use-package dired+)
+;; re use dired buffers
+(diredp-toggle-find-file-reuse-dir 1)
+
+;; (defadvice dired-delete-entry (before force-clean-up-buffers (file) activate)
+;;   (kill-buffer (get-file-buffer file)))
 
 
 (use-package projectile)
@@ -291,13 +297,13 @@
 (use-package free-keys)
 
 
-(use-package smart-mode-line
-  :config
-  (setq sml/no-confirm-load-theme t)
-  (rich-minority-mode 1)
-  (setq rm-whitelist t)
-  (sml/setup)
-  (sml/apply-theme 'light))
+;; (use-package smart-mode-line
+;;   :config
+;;   (setq sml/no-confirm-load-theme t)
+;;   (rich-minority-mode 1)
+;;   (setq rm-whitelist t)
+;;   (sml/setup)
+;;   (sml/apply-theme 'light))
 
 ;; (setq mode-line-format
 ;;       '("%e" mode-line-front-space mode-line-mule-info mode-line-client
@@ -446,12 +452,6 @@
   (ace-link-setup-default "f"))
 
 
-(use-package writegood-mode)
-
-
-(use-package writeroom-mode)
-
-
 (use-package sotlisp)
 
 
@@ -462,6 +462,11 @@
 
 (use-package markdown-mode)
 
+
+(use-package writegood-mode)
+(use-package writeroom-mode
+  :config
+  (add-hook 'markdown-mode-hook 'cap))
 
 (use-package auto-capitalize
   :config
