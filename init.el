@@ -157,6 +157,11 @@
 (use-package projectile)
 
 
+;; general packages
+
+
+;; programming mode packages
+
 (use-package smartparens
   :config
   (sp-pair "`" "`" :wrap "C-`")
@@ -166,6 +171,19 @@
     (turn-on-smartparens-strict-mode))
   (add-hook 'prog-mode-hook 'strict-smartparens))
 
+
+(use-package electric-operator
+  :config
+  (add-hook 'python-mode-hook #'electric-operator-mode))
+
+
+(use-package real-auto-save
+  :config
+  (add-hook 'prog-mode-hook 'real-auto-save-mode)
+  (setq real-auto-save-interval 4))
+
+
+;; python mode
 
 (use-package elpy
   :config
@@ -185,11 +203,6 @@
                         (point-max))))
   (define-key elpy-mode-map (kbd "C-c C-c") 'my/send-region-or-buffer))
 
-
-(use-package real-auto-save
-  :config
-  (add-hook 'prog-mode-hook 'real-auto-save-mode)
-  (setq real-auto-save-interval 4))
 
 
 (use-package multiple-cursors
@@ -557,6 +570,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; utilities
 
+;; remote connection
+(defun connect-to-server ()
+  (interactive)
+  (dired (format  "/%s@%s:/" server-user server-host)))
 
 ;; recenter when hyperlink is clicked
 (defun my-recenter-on-find-function (orig &rest args)
