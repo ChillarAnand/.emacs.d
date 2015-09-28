@@ -220,7 +220,7 @@
 
 
 (use-package multiple-cursors
-  :init
+  :config
   (global-set-key (kbd "C-c m e") 'mc/edit-lines)
   (global-set-key (kbd "C-c m a") 'mc/mark-all-like-this)
   (global-set-key (kbd "C->") 'mc/mark-next-like-this)
