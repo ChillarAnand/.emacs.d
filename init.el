@@ -123,7 +123,7 @@
 ;; add melpa to archives
 (add-to-list 'package-archives
              '("melpa" . "http://melpa.org/packages/") t)
-;;(package-refresh-contents)
+(package-refresh-contents)
 (package-initialize)
 
 ;; dont check signatures
@@ -168,6 +168,11 @@
 
 ;; programming mode packages
 
+(use-package flycheck
+  :config
+  (add-hook 'after-init-hook #'global-flycheck-mode))
+
+
 (use-package smartparens
   :config
   (sp-pair "`" "`" :wrap "C-`")
@@ -201,6 +206,10 @@
   ;; (setq elpy-rpc-python-command "python3")
   (append grep-find-ignored-files "flycheck_*")
 
+  ;; activate exp
+  (pyvenv-workon "exp")
+  (elpy-rpc-restart)
+  
   (defun my/send-region-or-buffer (&optional arg)
     (interactive "P")
     (elpy-shell-send-region-or-buffer arg)
@@ -208,7 +217,6 @@
       (set-window-point (get-buffer-window (current-buffer))
                         (point-max))))
   (define-key elpy-mode-map (kbd "C-c C-c") 'my/send-region-or-buffer))
-
 
 
 (use-package multiple-cursors
@@ -571,6 +579,13 @@
                         (point-max)))))
 
 
+;; slides
+(load-file "~/.emacs.d/vendor/htmlize.el")
+(use-package htmlize)
+(require 'org)
+(use-package ox-reveal
+  :config
+  (setq org-reveal-root "file:///home/anand/.emacs.d/vendor/reveal.js"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; utilities
