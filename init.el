@@ -52,6 +52,9 @@
 (setq split-height-threshold nil)
 (setq split-width-threshold 0)
 
+;; always kill line with whitespace
+(setq kill-whole-line t)
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -590,10 +593,31 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; utilities
 
+(defun is-line-empty-p ()
+  "Return t if current line is empty."
+  (save-excursion
+    (beginning-of-line)
+    (looking-at "[[:space:]]*$")))
+
+(defun is-inside-parens-p ()
+  "Return t if point is inside parens."
+  (> (car (syntax-ppss)) 0))
+
+(defun my-lispy-kill ()
+  "Clean up whitespace along with lispy kill."
+  (interactive)
+  (if (is-line-empty-p)
+      (lispy-kill)
+    (if (is-inside-parens-p)
+        (lispy-kill)
+      (lispy-kill)
+      (kill-line))))
+
 ;; remote connection
 (defun connect-to-server ()
   (interactive)
   (dired (format  "/%s@%s:/" server-user server-host)))
+
 
 ;; recenter when hyperlink is clicked
 (defun my-recenter-on-find-function (orig &rest args)
@@ -620,7 +644,7 @@ Repeated invocations toggle between the two most recently open buffers."
 
 
 (defun swap-numbers-symbols ()
-  "Bind symbols to digits."
+  "Swap symbols to digits."
   (interactive)
   (define-key key-translation-map (kbd "!") (kbd "1"))
   (define-key key-translation-map (kbd "@") (kbd "2"))
@@ -680,6 +704,7 @@ Repeated invocations toggle between the two most recently open buffers."
               #'launch-separate-emacs-in-terminal)
             t)
   (kill-emacs))
+
 
 (defun get-positions-of-line-or-region ()
   "Return positions (beg . end) of the current line
@@ -878,8 +903,11 @@ With a prefix argument N, (un)comment that many sexps."
  ("M-?" . mark-paragraph)
  ("M-/" . hippie-expand))
 
-(define-key emacs-lisp-mode-map (kbd "C-;")
-  #'comment-or-uncomment-sexp)
+
+;; lisp mode
+(define-key lispy-mode-map (kbd "C-;") #'comment-or-uncomment-sexp)
+(define-key lispy-mode-map (kbd "C-k") #'my-lispy-kill)
+
 
 ;; kill lines backward
 (global-set-key (kbd "C-<backspace>") (lambda ()
@@ -900,7 +928,7 @@ With a prefix argument N, (un)comment that many sexps."
 (unless (fboundp 'toggle-frame-fullscreen)
   (global-set-key (kbd "<f11>") 'prelude-fullscreen))
 
-;;(global-set-key (kbd "C-h") 'paredit-backward-delete)
+
 ;;(global-set-key (kbd "C-h") 'delete-backward-char)
 (define-key minibuffer-local-map (kbd "C-c C-l") 'helm-minibuffer-history)
 
