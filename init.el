@@ -176,6 +176,11 @@
   (add-hook 'after-init-hook #'global-flycheck-mode))
 
 
+(use-package vimish-fold
+  :config
+  (vimish-fold-global-mode-enable-in-buffers))
+
+
 (use-package smartparens
   :config
   (sp-pair "`" "`" :wrap "C-`")
