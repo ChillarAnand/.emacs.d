@@ -308,13 +308,13 @@
 (use-package free-keys)
 
 
-;; (use-package smart-mode-line
-;;   :config
-;;   (setq sml/no-confirm-load-theme t)
-;;   (rich-minority-mode 1)
-;;   (setq rm-whitelist t)
-;;   (sml/setup)
-;;   (sml/apply-theme 'light))
+(use-package smart-mode-line
+  :config
+  (setq sml/no-confirm-load-theme t)
+  (rich-minority-mode 1)
+  (setq rm-whitelist t)
+  (sml/setup)
+  (sml/apply-theme 'light))
 
 ;; (setq mode-line-format
 ;;       '("%e" mode-line-front-space mode-line-mule-info mode-line-client
@@ -593,6 +593,13 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; utilities
 
+
+;; remote connection
+(defun connect-to-server ()
+  (interactive)
+  (dired (format  "/ssh:%s@%s:/" server-user server-host)))
+
+
 (defun is-line-empty-p ()
   "Return t if current line is empty."
   (save-excursion
@@ -614,9 +621,9 @@
       (kill-line))))
 
 ;; remote connection
-(defun connect-to-server ()
-  (interactive)
-  (dired (format  "/%s@%s:/" server-user server-host)))
+;; (defun connect-to-server ()
+;;   (interactive)
+;;   (dired (format  "/%s@%s:/" server-user server-host)))
 
 
 ;; recenter when hyperlink is clicked
@@ -916,17 +923,6 @@ With a prefix argument N, (un)comment that many sexps."
                                         (indent-according-to-mode)))
 
 (global-set-key [remap kill-whole-line] 'delete-whole-line)
-
-;; Activate occur easily inside isearch
-(define-key isearch-mode-map (kbd "C-o")
-  (lambda () (interactive)
-    (let ((case-fold-search isearch-case-fold-search))
-      (occur (if isearch-regexp
-                 isearch-string
-               (regexp-quote isearch-string))))))
-
-(unless (fboundp 'toggle-frame-fullscreen)
-  (global-set-key (kbd "<f11>") 'prelude-fullscreen))
 
 
 ;;(global-set-key (kbd "C-h") 'delete-backward-char)
