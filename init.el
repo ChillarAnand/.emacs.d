@@ -178,7 +178,8 @@
 
 (use-package vimish-fold
   :config
-  (vimish-fold-global-mode-enable-in-buffers))
+  (vimish-fold-global-mode-enable-in-buffers)
+  (add-hook 'markdown-mode-hook #'vimish-fold-mode))
 
 
 (use-package smartparens
@@ -224,8 +225,21 @@
     (with-current-buffer (process-buffer (elpy-shell-get-or-create-process))
       (set-window-point (get-buffer-window (current-buffer))
                         (point-max))))
-  (define-key elpy-mode-map (kbd "C-c C-c") 'my/send-region-or-buffer))
+  (define-key elpy-mode-map (kbd "C-c C-c") 'my/send-region-or-buffer)
 
+  (defun company-yasnippet-or-completion ()
+    "Solve company yasnippet conflicts."
+    (interactive)
+    (let ((yas-fallback-behavior
+           (apply 'company-complete-common nil)))
+      (yas-expand)))
+
+  (add-hook 'company-mode-hook
+            (lambda ()
+              (substitute-key-definition
+               'company-complete-common
+               'company-yasnippet-or-completion
+               company-active-map))))
 
 (use-package multiple-cursors
   :config
