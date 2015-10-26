@@ -159,6 +159,9 @@
 ;; re use dired buffers
 (diredp-toggle-find-file-reuse-dir 1)
 
+;; hide unnecessary files
+(setq-default dired-omit-files "^\\.?#\\|^\\.$\\|^\\.\\.$\\|^\\.")
+
 ;; (defadvice dired-delete-entry (before force-clean-up-buffers (file) activate)
 ;;   (kill-buffer (get-file-buffer file)))
 
@@ -559,46 +562,91 @@
   (add-hook 'emacs-lisp-mode-hook (lambda () (lispy-mode 1))))
 
 
+;; sql config
 (require 'sql)
-(progn
-  (sql-set-product "mysql")
-  (setq sql-port 3306)
-  (setq sql-connection-alist
-        '(
-          (pool-server
-           (sql-server sql-server-address)
-           (sql-user sql-server-user)
-           (sql-password sql-server-password)
-           (sql-database sql-server-database)
-           (sql-port sql-port))
+(use-package sqlup-mode
+  :config
+  (add-hook 'sql-mode-hook 'sqlup-mode))
 
-          (pool-local
-           (sql-server sql-local-server)
-           (sql-user sql-local-user)
-           (sql-password sql-local-password)
-           (sql-database sql-local-database)
-           (sql-port sql-port))))
+(use-package sql-indent
+  :config
+  (eval-after-load "sql"
+    '(load-library "sql-indent")))
 
-  (defun sql-connect-preset (name)
-    "Connect to a predefined SQL connection listed in `sql-connection-alist'"
-    (eval `(let ,(cdr (assoc name sql-connection-alist))
-             (flet ((sql-get-login (&rest what)))
-               (sql-product-interactive sql-product)))))
+(add-hook 'sql-interactive-mode-hook
+          (lambda ()
+            (toggle-truncate-lines t)))
 
-  (defun sql-pool-server ()
-    (interactive)
-    (sql-connect-preset 'pool-server))
+(sql-set-product "mysql")
+(setq sql-port 3306)
+(setq sql-connection-alist
+      '(
+        (pool-server
+         (sql-server sql-server-address)
+         (sql-user sql-server-user)
+         (sql-password sql-server-password)
+         (sql-database sql-server-database)
+         (sql-port sql-port))
+        (pool-local
+         (sql-server sql-local-server)
+         (sql-user sql-local-user)
+         (sql-password sql-local-password)
+         (sql-database sql-local-database)
+         (sql-port sql-port))))
 
-  (defun sql-pool-local ()
-    (interactive)
-    (sql-connect-preset 'pool-local))
+(defun sql-connect-preset (name)
+  "Connect to a predefined SQL connection listed in `sql-connection-alist'"
+  (eval `(let ,(cdr (assoc name sql-connection-alist))
+           (flet ((sql-get-login (&rest what)))
+             (sql-product-interactive sql-product)))))
 
-  (defun mysql-send-paragraph ()
-    (interactive)
-    (sql-send-paragraph)
-    (with-current-buffer (process-buffer (get-process "SQL"))
-      (set-window-point (get-buffer-window (current-buffer))
-                        (point-max)))))
+(defun sql-pool-server ()
+  (interactive)
+  (sql-connect-preset 'pool-server))
+
+(defun sql-pool-local ()
+  (interactive)
+  (sql-connect-preset 'pool-local))
+
+(defun mysql-send-paragraph ()
+  (interactive)
+  (sql-send-paragraph)
+  (with-current-buffer (process-buffer (get-process "SQL"))
+    (set-window-point (get-buffer-window (current-buffer))
+                      (point-max))))
+
+(defun sql-add-newline-first (output)
+  "Add newline to beginning of OUTPUT for `comint-preoutput-filter-functions'"
+  (remove-hook 'comint-preoutput-filter-functions
+               'sql-add-newline-first)
+  (concat "\n" output))
+
+(defun my-sql-save-history-hook ()
+  (let ((lval 'sql-input-ring-file-name)
+        (rval 'sql-product))
+    (if (symbol-value rval)
+        (let ((filename 
+               (concat "~/.emacs.d/sql/"
+                       (symbol-name (symbol-value rval))
+                       "-history.sql")))
+          (set (make-local-variable lval) filename))
+      (error
+       (format "SQL history will not be saved because %s is nil"
+               (symbol-name rval))))))
+
+(add-hook 'sql-interactive-mode-hook 'my-sql-save-history-hook)
+
+(defun sql-add-newline-first (output)
+  "Add newline to beginning of OUTPUT for `comint-preoutput-filter-functions'"
+  (message "fooo")
+  (concat "\n" output))
+
+(defun sqli-add-hooks ()
+  "Add hooks to `sql-interactive-mode-hook'."
+  (add-hook 'comint-preoutput-filter-functions
+            'sql-add-newline-first))
+
+(add-hook 'sql-interactive-mode-hook 'sqli-add-hooks)
 
 
 ;; slides
