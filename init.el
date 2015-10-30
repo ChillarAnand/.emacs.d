@@ -660,6 +660,33 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; utilities
 
+(defun my-edit-file-as-root ()
+  "Find file as root"
+  (interactive)
+  (let*
+      ((sudo (/= (call-process "sudo" nil nil "-n true") 0))
+       (file-name
+        (if (tramp-tramp-file-p buffer-file-name)
+            (with-parsed-tramp-file-name buffer-file-name parsed
+              (tramp-make-tramp-file-name
+               (if sudo "sudo" "su")
+               "root"
+               parsed-host
+               parsed-localname
+               (let ((tramp-postfix-host-format "|")
+                     (tramp-prefix-format))
+                 (tramp-make-tramp-file-name
+                  parsed-method
+                  parsed-user
+                  parsed-host
+                  ""
+                  parsed-hop))))
+          (concat (if sudo
+                      "/sudo::"
+                    "/su::")
+                  buffer-file-name))))
+    (find-alternate-file file-name)))
+
 
 ;; remote connection
 (defun connect-to-server ()
