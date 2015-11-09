@@ -112,36 +112,11 @@
 ;; Packages
 
 
-;; save point positions across sessions
-(require 'saveplace)
-(setq-default save-place t)
-(setq save-place-forget-unreadable-files nil)
-(setq save-place-file (concat user-emacs-directory "saveplace.el"))
-
-
-;; enable semantic mode
-(semantic-mode 1)
-
-
-;; add melpa to archives
-(add-to-list 'package-archives
-             '("melpa" . "http://melpa.org/packages/") t)
-(package-refresh-contents)
-(package-initialize)
-
-;; dont check signatures
-(setq package-check-signature nil)
-
-;; install use package
-(unless (package-installed-p 'use-package)
-  (package-install 'use-package))
-(require 'use-package)
-(setq use-package-always-ensure t)
-
-
 ;; dired config
 (require 'dired)
-(use-package dired+)
+
+;; auto revert dired buffers
+(add-hook 'dired-mode-hook 'auto-revert-mode)
 
 ;; auto select target as split
 (setq dired-dwim-target t)
@@ -157,7 +132,7 @@
                 '("\\.zip\\'" ".zip" "unzip")))
 
 ;; re use dired buffers
-(diredp-toggle-find-file-reuse-dir 1)
+;; (diredp-toggle-find-file-reuse-dir 1)
 
 ;; hide unnecessary files
 (setq-default dired-omit-files "^\\.?#\\|^\\.$\\|^\\.\\.$\\|^\\.")
@@ -166,13 +141,51 @@
 ;;   (kill-buffer (get-file-buffer file)))
 
 
-(use-package projectile)
+;; save point positions across sessions
+(require 'saveplace)
+(setq-default save-place t)
+(setq save-place-forget-unreadable-files nil)
+(setq save-place-file (concat user-emacs-directory "saveplace.el"))
+
+;; save history
+;; (psession-mode 1) 
+(savehist-mode 1)
+(setq history-length 1000)
+(setq savehist-additional-variables '(kill-ring search-ring regexp-search-ring))
+;; (setq savehist-file "~/.emacs.d/savehist")
+
+
+;; enable semantic mode
+(semantic-mode 1)
+
+
+;; add melpa to archives
+(add-to-list 'package-archives
+             '("melpa" . "http://melpa.org/packages/") t)
+(package-refresh-contents)
+(package-initialize)
+
+;; dont check signatures
+(setq package-check-signature nil)
+
+
+;; install use package
+(unless (package-installed-p 'use-package)
+  (package-install 'use-package))
+(require 'use-package)
+(setq use-package-always-ensure t)
 
 
 ;; general packages
+(use-package dired+)
+
+(use-package session)
+(add-hook 'after-init-hook 'session-initialize)
 
 
 ;; programming mode packages
+
+(use-package projectile)
 
 (use-package flycheck
   :config
@@ -243,6 +256,10 @@
                'company-complete-common
                'company-yasnippet-or-completion
                company-active-map))))
+
+
+(use-package salt-mode)
+
 
 (use-package multiple-cursors
   :config
