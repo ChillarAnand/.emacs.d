@@ -17,6 +17,7 @@
   "The root dir of the Emacs")
 (setq package-user-dir (expand-file-name "elpa" root-dir))
 (setq package-vendor-dir (expand-file-name "vendor" root-dir))
+(setq recent-files-dir (expand-file-name "recentf" root-dir))
 (load-file (expand-file-name ".private.el" root-dir))
 
 ;; Always load newest byte code
@@ -141,6 +142,17 @@
 ;;   (kill-buffer (get-file-buffer file)))
 
 
+;; save recent files
+(require 'recentf)
+(setq
+ ;; recentf-save-file (expand-file-name "recentf" recent-files-dir)
+ recentf-max-saved-items 500
+ recentf-max-menu-items 15
+ ;; disable recentf-cleanup on Emacs start, because it can cause
+ ;; problems with remote files
+ recentf-auto-cleanup 'never)
+(recentf-mode +1)
+
 ;; save point positions across sessions
 (require 'saveplace)
 (setq-default save-place t)
@@ -220,7 +232,9 @@
 
 
 ;; python mode
-
+(add-to-list 'load-path "~/projects/lisp/elpy")
+(load "elpy" nil t)
+;; (elpy-enable)
 (use-package elpy
   :config
   (elpy-enable)
