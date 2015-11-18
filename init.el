@@ -543,7 +543,9 @@
   (defun cap ()
     (auto-capitalize-mode))
   (add-hook 'org-mode-hook 'cap)
-  (add-hook 'markdown-mode-hook 'cap))
+  (add-hook 'markdown-mode-hook 'cap)
+  (defvar auto-capitalize-words
+    '("I" "Python" "Emacs" "You")))
 
 
 (use-package keyfreq
