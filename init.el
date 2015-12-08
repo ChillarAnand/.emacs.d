@@ -232,8 +232,8 @@
 
 
 ;; python mode
-(add-to-list 'load-path "~/projects/lisp/elpy")
-(load "elpy" nil t)
+;; (add-to-list 'load-path "~/projects/lisp/elpy") 
+;; (load "elpy" nil t)
 ;; (elpy-enable)
 (use-package elpy
   :config
@@ -256,6 +256,7 @@
       (set-window-point (get-buffer-window (current-buffer))
                         (point-max))))
   (define-key elpy-mode-map (kbd "C-c C-c") 'my/send-region-or-buffer)
+  (define-key elpy-mode-map (kbd "M-.") 'pop-tag-mark)
 
   (defun company-yasnippet-or-completion ()
     "Solve company yasnippet conflicts."
@@ -690,10 +691,12 @@
   :config
   (setq org-reveal-root "file:///home/anand/.emacs.d/vendor/reveal.js"))
 
+(use-package ob-translate)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; utilities
 
-(defun my-edit-file-as-root ()
+(defun my-edit-file-as-sudo/root ()
   "Find file as root"
   (interactive)
   (let*
