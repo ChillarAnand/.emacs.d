@@ -336,6 +336,8 @@
 
 (use-package magit
   :config
+  (defun git-sync ()
+    (shell-command "git-"))
   (setq magit-status-buffer-switch-function 'switch-to-buffer)
   (setq magit-last-seen-setup-instructions "1.4.0"))
 
