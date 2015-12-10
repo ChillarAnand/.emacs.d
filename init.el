@@ -320,7 +320,8 @@
 
   (set (make-local-variable 'company-backends) '(company-css))
 
-  (bind-key "C-c C-i" 'web-mode-buffer-indent))
+  (bind-key "C-c C-i" 'web-mode-buffer-indent)
+  (bind-key "C-c C-l" 'web-mode-fold-or-unfold))
 
 
 (use-package company-quickhelp
