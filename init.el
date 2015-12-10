@@ -160,7 +160,7 @@
 (setq save-place-file (concat user-emacs-directory "saveplace.el"))
 
 ;; save history
-;; (psession-mode 1) 
+;; (psession-mode 1)
 (savehist-mode 1)
 (setq history-length 1000)
 (setq savehist-additional-variables '(kill-ring search-ring regexp-search-ring))
@@ -228,11 +228,11 @@
 (use-package real-auto-save
   :config
   (add-hook 'prog-mode-hook 'real-auto-save-mode)
-  (setq real-auto-save-interval 4))
+  (setq real-auto-save-interval 10))
 
 
 ;; python mode
-;; (add-to-list 'load-path "~/projects/lisp/elpy") 
+;; (add-to-list 'load-path "~/projects/lisp/elpy")
 ;; (load "elpy" nil t)
 ;; (elpy-enable)
 (use-package elpy
@@ -248,7 +248,7 @@
   ;; activate exp
   (pyvenv-workon "exp")
   (elpy-rpc-restart)
-  
+
   (defun my/send-region-or-buffer (&optional arg)
     (interactive "P")
     (elpy-shell-send-region-or-buffer arg)
@@ -667,7 +667,7 @@
   (let ((lval 'sql-input-ring-file-name)
         (rval 'sql-product))
     (if (symbol-value rval)
-        (let ((filename 
+        (let ((filename
                (concat "~/.emacs.d/sql/"
                        (symbol-name (symbol-value rval))
                        "-history.sql")))
