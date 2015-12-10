@@ -256,7 +256,7 @@
       (set-window-point (get-buffer-window (current-buffer))
                         (point-max))))
   (define-key elpy-mode-map (kbd "C-c C-c") 'my/send-region-or-buffer)
-  (define-key elpy-mode-map (kbd "M-.") 'pop-tag-mark)
+  (define-key elpy-mode-map (kbd "M-,") 'pop-tag-mark)
 
   (defun company-yasnippet-or-completion ()
     "Solve company yasnippet conflicts."
