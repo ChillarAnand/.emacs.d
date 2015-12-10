@@ -8,3 +8,10 @@ elpa
 /saveplace.el
 semanticdb
 session.*
+*.el
+*.el~
+/.session
+*~
+/bookmarks
+/history
+/tramp
