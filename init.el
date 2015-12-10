@@ -336,10 +336,15 @@
 
 (use-package magit
   :config
+
   (defun git-sync ()
-    (shell-command "git-"))
+    (interactive)
+    (shell-command "git-sync"))
+
   (setq magit-status-buffer-switch-function 'switch-to-buffer)
-  (setq magit-last-seen-setup-instructions "1.4.0"))
+  (setq magit-last-seen-setup-instructions "1.4.0")
+
+  (bind-key "C-c C-s" 'git-sync))
 
 
 (use-package sx
