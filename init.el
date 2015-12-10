@@ -1116,6 +1116,18 @@ With a prefix argument N, (un)comment that many sexps."
 
 (message "Successfully loaded config... ")
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; hooks
+
+(add-hook 'before-save-hook 'whitespace-cleanup)
+
+(defun save-all ()
+  (interactive)
+  (save-some-buffers t))
+(add-hook 'focus-out-hook 'save-all)
+
+
+
 
 (provide 'init)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
