@@ -232,45 +232,42 @@
 
 
 ;; python mode
-;; (add-to-list 'load-path "~/projects/lisp/elpy")
-;; (load "elpy" nil t)
-;; (elpy-enable)
-(use-package elpy
-  :config
-  (elpy-enable)
-  (setq python-indent-offset 4)
-  (setq elpy-test-runner 'elpy-test-pytest-runner)
-  (setq elpy-rpc-timeout nil)
-  (setq elpy-rgrep-file-pattern   "*.py *.html")
-  ;; (setq elpy-rpc-python-command "python3")
-  (append grep-find-ignored-files "flycheck_*")
+(add-to-list 'load-path "~/Projects/lisp/elpy")
+(load "elpy" nil t)
+(elpy-enable)
+(setq python-indent-offset 4)
+(setq elpy-test-runner 'elpy-test-pytest-runner)
+(setq elpy-rpc-timeout nil)
+(setq elpy-rgrep-file-pattern   "*.py *.html")
+;; (setq elpy-rpc-python-command "python3")
+(append grep-find-ignored-files "flycheck_*")
 
-  ;; activate exp
-  (pyvenv-workon "exp")
-  (elpy-rpc-restart)
+;; activate exp
+(pyvenv-workon "exp")
+(elpy-rpc-restart)
 
-  (defun my/send-region-or-buffer (&optional arg)
-    (interactive "P")
-    (elpy-shell-send-region-or-buffer arg)
-    (with-current-buffer (process-buffer (elpy-shell-get-or-create-process))
-      (set-window-point (get-buffer-window (current-buffer))
-                        (point-max))))
-  (define-key elpy-mode-map (kbd "C-c C-c") 'my/send-region-or-buffer)
-  (define-key elpy-mode-map (kbd "M-,") 'pop-tag-mark)
+(defun my/send-region-or-buffer (&optional arg)
+  (interactive "P")
+  (elpy-shell-send-region-or-buffer arg)
+  (with-current-buffer (process-buffer (elpy-shell-get-or-create-process))
+    (set-window-point (get-buffer-window (current-buffer))
+                      (point-max))))
+(define-key elpy-mode-map (kbd "C-c C-c") 'my/send-region-or-buffer)
+(define-key elpy-mode-map (kbd "M-,") 'pop-tag-mark)
 
-  (defun company-yasnippet-or-completion ()
-    "Solve company yasnippet conflicts."
-    (interactive)
-    (let ((yas-fallback-behavior
-           (apply 'company-complete-common nil)))
-      (yas-expand)))
+(defun company-yasnippet-or-completion ()
+  "Solve company yasnippet conflicts."
+  (interactive)
+  (let ((yas-fallback-behavior
+         (apply 'company-complete-common nil)))
+    (yas-expand)))
 
-  (add-hook 'company-mode-hook
-            (lambda ()
-              (substitute-key-definition
-               'company-complete-common
-               'company-yasnippet-or-completion
-               company-active-map))))
+(add-hook 'company-mode-hook
+          (lambda ()
+            (substitute-key-definition
+             'company-complete-common
+             'company-yasnippet-or-completion
+             company-active-map)))
 
 
 (use-package salt-mode)
