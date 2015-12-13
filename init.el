@@ -57,6 +57,10 @@
 (setq kill-whole-line t)
 
 
+(setq max-lisp-eval-depth 10000)
+(setq max-specpdl-size 32000)
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; ui config
@@ -372,7 +376,7 @@
   :config
   (setq sml/no-confirm-load-theme t)
   (rich-minority-mode 1)
-  (setq rm-whitelist t)
+  (setq rm-whitelist nil)
   (sml/setup)
   (sml/apply-theme 'light))
 
