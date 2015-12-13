@@ -15,4 +15,5 @@ session.*
 /bookmarks
 /history
 /tramp
-/url/cache/k3/http/com/gravatar/www/17cbf844e6abf3c45ad2bc2921da1196
+/url/cache/
+.cask/
