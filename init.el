@@ -53,9 +53,9 @@
 (setq split-height-threshold nil)
 (setq split-width-threshold 0)
 
-;; always kill line with whitespace
-(setq kill-whole-line t)
 
+;; always kill line with whitespace
+;; (setq kill-whole-line t)
 
 (setq max-lisp-eval-depth 10000)
 (setq max-specpdl-size 32000)
