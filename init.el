@@ -494,7 +494,9 @@
          helm-buffers-fuzzy-matching           t
          helm-move-to-line-cycle-in-source     t
          helm-ff-search-library-in-sexp        t
-         helm-ff-file-name-history-use-recentf t))
+         helm-ff-file-name-history-use-recentf t)
+
+  (bind-key "C-c C-o" 'helm-buffer-switch-other-window))
 
 
 ;; swiper for search
