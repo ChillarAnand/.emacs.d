@@ -137,7 +137,7 @@
                 '("\\.zip\\'" ".zip" "unzip")))
 
 ;; re use dired buffers
-;; (diredp-toggle-find-file-reuse-dir 1)
+(diredp-toggle-find-file-reuse-dir 1)
 
 ;; hide unnecessary files
 (setq-default dired-omit-files "^\\.?#\\|^\\.$\\|^\\.\\.$\\|^\\.")
