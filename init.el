@@ -236,7 +236,7 @@
 
 
 ;; python mode
-(add-to-list 'load-path "~/Projects/lisp/elpy")
+(add-to-list 'load-path "~/projects/lisp/elpy")
 (load "elpy" nil t)
 (elpy-enable)
 (setq python-indent-offset 4)
@@ -909,6 +909,7 @@ point reaches the beginning or end of the buffer, stop there."
 (global-set-key [remap move-beginning-of-line]
                 'smart-move-beginning-of-line)
 
+
 (defun uncomment-sexp (&optional n)
   "Uncomment a sexp around point."
   (interactive "P")
@@ -1015,16 +1016,17 @@ With a prefix argument N, (un)comment that many sexps."
 
 
 
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; key bindings
 
 (bind-keys*
  ("<f12>" . menu-bar-mode)
 
- ("C-+" .  text-scale-increase)
- ("C--" .  text-scale-decrease)
+ ("C-+" . text-scale-increase)
  ("C-," .  avy-goto-char)
  ("C-^" .  top-join-line)
+ ("C-1" . just-one-space)
 
  ("C-x C-1" . delete-other-windows)
  ("C-x C-3" . split-window-right)
@@ -1118,10 +1120,9 @@ With a prefix argument N, (un)comment that many sexps."
 (key-chord-define-global "sm" 'set-mark-command)
 
 
-(message "Successfully loaded config... ")
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; hooks
+
 
 (add-hook 'before-save-hook 'whitespace-cleanup)
 
@@ -1131,6 +1132,7 @@ With a prefix argument N, (un)comment that many sexps."
 (add-hook 'focus-out-hook 'save-all)
 
 
+(message "Successfully loaded config... ")
 
 
 (provide 'init)
