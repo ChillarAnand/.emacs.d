@@ -136,9 +136,6 @@
   '(add-to-list 'dired-compress-file-suffixes
                 '("\\.zip\\'" ".zip" "unzip")))
 
-;; re use dired buffers
-(diredp-toggle-find-file-reuse-dir 1)
-
 ;; hide unnecessary files
 (setq-default dired-omit-files "^\\.?#\\|^\\.$\\|^\\.\\.$\\|^\\.")
 
@@ -194,6 +191,8 @@
 
 ;; general packages
 (use-package dired+)
+(diredp-toggle-find-file-reuse-dir 1)
+
 
 (use-package session)
 (add-hook 'after-init-hook 'session-initialize)
