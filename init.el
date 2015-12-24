@@ -340,6 +340,13 @@
 (use-package magit
   :config
 
+  ;; restore pointer in git commit buffer
+  (setq session-name-disable-regexp "\\(?:\\`'\\.git/[A-Z_]+\\'\\)")
+  (with-eval-after-load 'pointback
+    (lambda ()
+      (when (or git-commit-mode git-rebase-mode)
+        (pointback-mode -1))))
+
   (defun git-sync ()
     (interactive)
     (async-shell-command "git-sync")
@@ -738,10 +745,16 @@
     (find-alternate-file file-name)))
 
 
+;; crontab edit
+(defun crontab-e ()
+  (interactive)
+  (with-editor-async-shell-command "crontab -e"))
+
+
 ;; remote connection
 (defun connect-to-server ()
   (interactive)
-  (dired (format  "/ssh:%s@%s:/" server-user server-host)))
+  (dired (format  "/sshx:%s@%s:/" server-user server-host)))
 
 
 (defun is-line-empty-p ()
