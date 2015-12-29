@@ -757,7 +757,7 @@
 ;; remote connection
 (defun connect-to-server ()
   (interactive)
-  (dired (format  "/sshx:%s@%s:/" server-user server-host)))
+  (dired (format  "/sshx:%s@%s:/home/anand/" server-user server-host)))
 
 
 (defun is-line-empty-p ()
