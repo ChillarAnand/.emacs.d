@@ -247,6 +247,9 @@
 (setq elpy-rgrep-file-pattern   "*.py *.html")
 ;; (setq elpy-rpc-python-command "python3")
 (append grep-find-ignored-files "flycheck_*")
+(setq python-shell-prompt-detect-failure-warning nil)
+
+
 
 ;; activate exp
 (pyvenv-workon "exp")
