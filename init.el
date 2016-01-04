@@ -278,6 +278,29 @@
              'company-yasnippet-or-completion
              company-active-map)))
 
+(defun ep-project-root()
+  "Return the root of the project(dir with manage.py in) or nil"
+  (interactive)
+  (let ((curdir default-directory)
+        (max 10)
+        (found nil))
+    (while (and (not found) (> max 0))
+      (progn
+        (if (or (file-exists-p (concat curdir "/bin/django")) ; Buildout?
+                (file-exists-p (concat curdir "manage.py")))
+            (progn
+              (setq found t))
+          (progn
+            (setq curdir (concat curdir "../"))
+            (setq max (- max 1))))))
+    (if found
+        (expand-file-name curdir))))
+
+(ep-project-root)
+
+
+;; (require 'cl-lib)
+;; (use-package pony-mode)
 
 (use-package salt-mode)
 
@@ -373,12 +396,12 @@
     (edit-server-start)))
 
 
-(use-package multi-term
-  :config
-  (setq multi-term-program "/bin/zsh")
-  (bind-key "C-c C-t" 'multi-term)
-  (bind-key "C-c C-n" 'multi-term-next)
-  (bind-key "C-c C-p" 'multi-term-prev))
+;; (use-package multi-term
+;;   :config
+;;   (setq multi-term-program "/bin/zsh")
+;;   (bind-key "C-c C-t" 'multi-term)
+;;   (bind-key "C-c C-n" 'multi-term-next)
+;;   (bind-key "C-c C-p" 'multi-term-prev))
 
 
 (use-package free-keys)
