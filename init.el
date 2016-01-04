@@ -620,6 +620,11 @@
   (add-hook 'emacs-lisp-mode-hook (lambda () (lispy-mode 1))))
 
 
+
+;; convinience
+;; (use-package pointback)
+
+
 ;; sql config
 (require 'sql)
 (use-package sqlup-mode
