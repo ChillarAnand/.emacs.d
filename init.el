@@ -11,6 +11,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; basic config
 
+;; dont truncate log messages
+(setq message-log-max t)
 
 ;; set package-user-dir to be relative to ~/.emacs.d/
 (defvar root-dir (file-name-directory load-file-name)
@@ -175,7 +177,7 @@
 ;; add melpa to archives
 (add-to-list 'package-archives
              '("melpa" . "http://melpa.org/packages/") t)
-(package-refresh-contents)
+;; (package-refresh-contents)
 (package-initialize)
 
 ;; dont check signatures
@@ -245,11 +247,10 @@
 (setq elpy-test-runner 'elpy-test-pytest-runner)
 (setq elpy-rpc-timeout nil)
 (setq elpy-rgrep-file-pattern   "*.py *.html")
+
 ;; (setq elpy-rpc-python-command "python3")
 (append grep-find-ignored-files "flycheck_*")
 (setq python-shell-prompt-detect-failure-warning nil)
-
-
 
 ;; activate exp
 (pyvenv-workon "exp")
@@ -299,7 +300,6 @@
 (ep-project-root)
 
 
-;; (require 'cl-lib)
 ;; (use-package pony-mode)
 
 (use-package salt-mode)
