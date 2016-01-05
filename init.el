@@ -155,12 +155,18 @@
  ;; problems with remote files
  recentf-auto-cleanup 'never)
 (recentf-mode +1)
+(run-at-time nil (* 5 60) 'recentf-save-list)
+(run-with-idle-timer 5  nil 'recentf-cleanup)
+
+
 
 ;; save point positions across sessions
 (require 'saveplace)
 (setq-default save-place t)
 (setq save-place-forget-unreadable-files nil)
 (setq save-place-file (concat user-emacs-directory "saveplace.el"))
+(setq session-name-disable-regexp "\\(?:\\`'\\.git/[A-Z_]+\\'\\)")
+
 
 ;; save history
 ;; (psession-mode 1)
@@ -787,6 +793,15 @@
   (interactive)
   (dired (format  "/sshx:%s@%s:/home/anand/" server-user server-host)))
 
+(defun dired-remote (name)
+  "Connect to a predefined server."
+  (interactive
+   (list
+    (completing-read "Connect to: " server-connection-alist)))
+  (when (not (or (equal name "")
+                 (equal name nil)))
+    (dired name)))
+
 
 (defun is-line-empty-p ()
   "Return t if current line is empty."
@@ -870,7 +885,7 @@ Repeated invocations toggle between the two most recently open buffers."
   (define-key key-translation-map (kbd ")") (kbd "0"))
   (define-key key-translation-map (kbd "9") (kbd "("))
   (define-key key-translation-map (kbd "0") (kbd ")")))
-(swap-numbers-parens)
+;; (swap-numbers-parens)
 
 
 (defun current-dired ()
@@ -1083,6 +1098,7 @@ With a prefix argument N, (un)comment that many sexps."
  ("C-x C-i" . delete-other-windows)
  ("C-x C-k" . kill-this-buffer)
  ("C-x C-m" . helm-M-x)
+ ("C-x C-o" . dired-remote)
  ("C-x C-z" . end-of-buffer)
  ("C-x r l" . helm-bookmarks)
 
