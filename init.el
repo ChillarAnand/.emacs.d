@@ -208,7 +208,13 @@
 
 ;; programming mode packages
 
-(use-package projectile)
+(use-package projectile
+  :init
+  (projectile-global-mode)
+  :config
+  (setq projectile-enable-caching t)
+  (setq projectile-cache-file (expand-file-name  "projectile.cache" root-dir)))
+
 
 (use-package flycheck
   :config
@@ -651,7 +657,7 @@
 
 
 ;; convinience
-;; (use-package pointback)
+(use-package pointback)
 
 
 ;; sql config

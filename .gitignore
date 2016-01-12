@@ -17,3 +17,5 @@ session.*
 /tramp
 /url/cache/
 .cask/
+/projectile-bookmarks.eld
+*.cache
