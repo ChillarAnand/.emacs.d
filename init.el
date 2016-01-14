@@ -379,11 +379,11 @@
   :config
 
   ;; restore pointer in git commit buffer
-  (setq session-name-disable-regexp "\\(?:\\`'\\.git/[A-Z_]+\\'\\)")
-  (with-eval-after-load 'pointback
-    (lambda ()
-      (when (or git-commit-mode git-rebase-mode)
-        (pointback-mode -1))))
+  (defun restore-point ()
+    (interactive)
+    (when (string-match ".git/COMMIT_EDITMSG" buffer-file-name)
+      (goto-char (point-min))))
+  (add-hook 'text-mode-hook 'restore-point)
 
   (defun git-sync ()
     (interactive)
@@ -795,9 +795,6 @@
 
 
 ;; remote connection
-(defun connect-to-server ()
-  (interactive)
-  (dired (format  "/sshx:%s@%s:/home/anand/" server-user server-host)))
 
 (defun dired-remote (name)
   "Connect to a predefined server."
