@@ -383,11 +383,12 @@
     (interactive)
     (when (string-match ".git/COMMIT_EDITMSG" buffer-file-name)
       (goto-char (point-min))))
-  (add-hook 'text-mode-hook 'restore-point)
+  (add-hook 'git-commit-mode-hook 'restore-point)
+
 
   (defun git-sync ()
     (interactive)
-    (async-shell-command "git-sync")
+    (async-shell-command "git pull origin master && git push origin master")
     (magit-refresh))
 
   (setq magit-status-buffer-switch-function 'switch-to-buffer)
