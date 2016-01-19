@@ -385,7 +385,6 @@
       (goto-char (point-min))))
   (add-hook 'git-commit-mode-hook 'restore-point)
 
-
   (defun git-sync ()
     (interactive)
     (async-shell-command "git pull origin master && git push origin master")
@@ -393,6 +392,7 @@
 
   (setq magit-status-buffer-switch-function 'switch-to-buffer)
   (setq magit-last-seen-setup-instructions "1.4.0")
+  (global-git-commit-mode)
 
   (bind-key "C-c C-s" 'git-sync))
 
