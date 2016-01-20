@@ -375,15 +375,17 @@
   (nyan-mode))
 
 
+(use-package pointback)
+
 (use-package magit
   :config
 
   ;; restore pointer in git commit buffer
-  (defun restore-point ()
-    (interactive)
-    (when (string-match ".git/COMMIT_EDITMSG" buffer-file-name)
-      (goto-char (point-min))))
-  (add-hook 'git-commit-mode-hook 'restore-point)
+  (with-eval-after-load 'pointback
+    (add-hook 'git-commit-setup-hook
+              (lambda ()
+                (when (or git-commit-mode git-rebase-mode)
+                  (pointback-mode -1)))))
 
   (defun git-sync ()
     (interactive)
@@ -657,8 +659,6 @@
 
 
 
-;; convinience
-(use-package pointback)
 
 
 ;; sql config
