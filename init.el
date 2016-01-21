@@ -399,6 +399,12 @@
   (bind-key "C-c C-s" 'git-sync))
 
 
+(use-package diff-hl
+  :config
+  (diff-hl-flydiff-mode)
+  (diff-hl-dired-mode))
+
+
 (use-package sx
   :config
   (require 'sx-load))
@@ -658,7 +664,7 @@
   (add-hook 'emacs-lisp-mode-hook (lambda () (lispy-mode 1))))
 
 
-
+(use-package paradox)
 
 
 ;; sql config
