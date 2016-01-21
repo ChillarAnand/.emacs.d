@@ -387,6 +387,9 @@
                 (when (or git-commit-mode git-rebase-mode)
                   (pointback-mode -1)))))
 
+  ;; hide async shell command output buffers
+  (add-to-list 'display-buffer-alist (cons "\\*Async Shell Command\\*.*" (cons #'display-buffer-no-window nil)))
+
   (defun git-sync ()
     (interactive)
     (async-shell-command "git pull origin master && git push origin master")
