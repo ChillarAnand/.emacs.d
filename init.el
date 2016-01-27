@@ -252,6 +252,7 @@
 (use-package pyvenv)
 (use-package highlight-indentation)
 (use-package yasnippet)
+(use-package company)
 (add-to-list 'load-path "~/projects/lisp/elpy")
 (load "elpy" nil t)
 (elpy-enable)
