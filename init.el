@@ -389,9 +389,7 @@
   (add-hook 'git-commit-mode-hook #'keep-saveplace-off)
 
   (defun keep-saveplace-off ()
-    (message "foo")
     (when (bound-and-true-p git-commit-mode)
-      (message "bar")
       (toggle-save-place)))
 
   ;; hide async shell command output buffers
