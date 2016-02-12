@@ -165,7 +165,6 @@
 (setq-default save-place t)
 (setq save-place-forget-unreadable-files nil)
 (setq save-place-file (concat user-emacs-directory "saveplace.el"))
-(setq session-name-disable-regexp "\\(?:\\`'\\.git/[A-Z_]+\\'\\)")
 
 
 ;; save history
@@ -205,7 +204,7 @@
 
 (use-package session)
 (add-hook 'after-init-hook 'session-initialize)
-
+(setq session-name-disable-regexp "\\(?:\\`'\\.git/[A-Z_]+\\'\\)")
 
 ;; programming mode packages
 
@@ -387,17 +386,20 @@
   :config
 
   ;; restore pointer in git commit buffer
-  (with-eval-after-load 'pointback
-    (add-hook 'git-commit-setup-hook
-              (lambda ()
-                (when (or git-commit-mode git-rebase-mode)
-                  (pointback-mode -1)))))
+  (add-hook 'git-commit-mode-hook #'keep-saveplace-off)
+
+  (defun keep-saveplace-off ()
+    (message "foo")
+    (when (bound-and-true-p git-commit-mode)
+      (message "bar")
+      (toggle-save-place)))
 
   ;; hide async shell command output buffers
   (add-to-list 'display-buffer-alist (cons "\\*Async Shell Command\\*.*" (cons #'display-buffer-no-window nil)))
 
   (defun git-sync ()
     (interactive)
+    (message "Syncing repo...")
     (async-shell-command "git pull origin master && git push origin master")
     (magit-refresh))
 
