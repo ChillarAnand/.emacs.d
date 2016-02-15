@@ -178,19 +178,6 @@
     (desktop-save-mode 1)))
 
 
-;; save point positions across sessions
-;; (require 'saveplace)
-;; (setq-default save-place t)
-;; (setq save-place-forget-unreadable-files nil)
-;; (setq save-place-file (concat user-emacs-directory "saveplace.el"))
-
-
-;; (use-package session)
-;; (add-hook 'after-init-hook 'session-initialize)
-;; (setq session-name-disable-regexp "\\(?:\\`'\\.git/[A-Z_]+\\'\\)")
-
-
-
 ;; save history
 ;; (psession-mode 1)
 (savehist-mode 1)
@@ -404,21 +391,6 @@
 
 (use-package magit
   :config
-
-  ;; restore pointer in git commit buffer
-  ;; (add-hook 'git-commit-mode-hook #'keep-saveplace-off)
-
-  ;; (defun keep-saveplace-off ()
-  ;;   (when (bound-and-true-p git-commit-mode)
-  ;;     (toggle-save-place)))
-
-  ;; (add-hook 'git-commit-mode-hook 'restore-point)
-  ;; (defun restore-point ()
-  ;;   (interactive)
-  ;;   (when (string-match ".git/COMMIT_EDITMSG" buffer-file-name)
-  ;;     (message "bar")
-  ;;     (goto-char (point-min))))
-
 
   ;; hide async shell command output buffers
   (add-to-list 'display-buffer-alist (cons "\\*Async Shell Command\\*.*" (cons #'display-buffer-no-window nil)))
