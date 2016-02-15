@@ -19,3 +19,5 @@ session.*
 .cask/
 /projectile-bookmarks.eld
 *.cache
+*.lock
+*.desktop

@@ -160,11 +160,35 @@
 
 
 
+;; Automatically save and restore sessions
+(setq desktop-dirname             "~/.emacs.d/desktop/"
+      desktop-base-file-name      "emacs.desktop"
+      desktop-base-lock-name      "lock"
+      desktop-path                (list desktop-dirname)
+      desktop-save                t
+      desktop-files-not-to-save   "^$" ;reload tramp paths
+      desktop-load-locked-desktop nil)
+(desktop-save-mode 1)
+
+(defun my-desktop ()
+  "Load the desktop and enable autosaving"
+  (interactive)
+  (let ((desktop-load-locked-desktop "ask"))
+    (desktop-read)
+    (desktop-save-mode 1)))
+
+
 ;; save point positions across sessions
-(require 'saveplace)
-(setq-default save-place t)
-(setq save-place-forget-unreadable-files nil)
-(setq save-place-file (concat user-emacs-directory "saveplace.el"))
+;; (require 'saveplace)
+;; (setq-default save-place t)
+;; (setq save-place-forget-unreadable-files nil)
+;; (setq save-place-file (concat user-emacs-directory "saveplace.el"))
+
+
+;; (use-package session)
+;; (add-hook 'after-init-hook 'session-initialize)
+;; (setq session-name-disable-regexp "\\(?:\\`'\\.git/[A-Z_]+\\'\\)")
+
 
 
 ;; save history
@@ -201,10 +225,6 @@
 (use-package dired+)
 (diredp-toggle-find-file-reuse-dir 1)
 
-
-(use-package session)
-(add-hook 'after-init-hook 'session-initialize)
-(setq session-name-disable-regexp "\\(?:\\`'\\.git/[A-Z_]+\\'\\)")
 
 ;; programming mode packages
 
@@ -386,11 +406,19 @@
   :config
 
   ;; restore pointer in git commit buffer
-  (add-hook 'git-commit-mode-hook #'keep-saveplace-off)
+  ;; (add-hook 'git-commit-mode-hook #'keep-saveplace-off)
 
-  (defun keep-saveplace-off ()
-    (when (bound-and-true-p git-commit-mode)
-      (toggle-save-place)))
+  ;; (defun keep-saveplace-off ()
+  ;;   (when (bound-and-true-p git-commit-mode)
+  ;;     (toggle-save-place)))
+
+  ;; (add-hook 'git-commit-mode-hook 'restore-point)
+  ;; (defun restore-point ()
+  ;;   (interactive)
+  ;;   (when (string-match ".git/COMMIT_EDITMSG" buffer-file-name)
+  ;;     (message "bar")
+  ;;     (goto-char (point-min))))
+
 
   ;; hide async shell command output buffers
   (add-to-list 'display-buffer-alist (cons "\\*Async Shell Command\\*.*" (cons #'display-buffer-no-window nil)))
@@ -1124,12 +1152,7 @@ With a prefix argument N, (un)comment that many sexps."
 (defun start-space-to-ctrl ()
   "Active space2cctl."
   (interactive)
-  (async-shell-command "s2cctl start"))
-
-(defun stop-space-to-ctrl ()
-  "Active space2cctl."
-  (interactive)
-  (async-shell-command "s2cctl stop"))
+  (async-shell-command "~/projects/ubuntu/os/space2ctrl.sh"))
 
 (start-space-to-ctrl)
 
@@ -1258,3 +1281,19 @@ With a prefix argument N, (un)comment that many sexps."
 (provide 'init)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; init.el ends here
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(flycheck-display-errors-function (function flycheck-pos-tip-error-messages))
+ '(package-selected-packages
+   (quote
+    (yasnippet writeroom-mode writegood-mode which-key web-mode vimish-fold use-package sx swiper-helm sqlup-mode sql-indent sotlisp smartparens smart-mode-line session salt-mode real-auto-save pyvenv pointback paradox ox-reveal openwith ob-translate nyan-mode multiple-cursors magit lispy keyfreq key-chord impatient-mode highlight-symbol highlight-indentation helm-swoop helm-projectile helm-github-stars helm-dired-recent-dirs helm-descbinds helm-chrome helm-ag header2 free-keys flycheck-pos-tip expand-region electric-operator edit-server easy-kill dired+ diff-hl company-quickhelp comment-dwim-2 bm benchmark-init auto-capitalize aggressive-indent ace-link)))
+ '(session-use-package t nil (session)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
