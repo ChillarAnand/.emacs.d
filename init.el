@@ -145,6 +145,7 @@
 ;;   (kill-buffer (get-file-buffer file)))
 
 
+
 ;; save recent files
 (require 'recentf)
 (setq
@@ -178,6 +179,7 @@
     (desktop-save-mode 1)))
 
 
+
 ;; save history
 ;; (psession-mode 1)
 (savehist-mode 1)
@@ -189,6 +191,10 @@
 ;; enable semantic mode
 (semantic-mode 1)
 
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; thirtd party packages
 
 ;; add melpa to archives
 (package-initialize)
@@ -206,6 +212,7 @@
   (package-install 'use-package))
 (require 'use-package)
 (setq use-package-always-ensure t)
+
 
 
 ;; general packages
@@ -266,7 +273,7 @@
 (setq python-indent-offset 4)
 (setq elpy-test-runner 'elpy-test-pytest-runner)
 (setq elpy-rpc-timeout nil)
-(setq elpy-rgrep-file-pattern   "*.py *.html")
+(setq elpy-rgrep-file-pattern "*.py *.html")
 
 ;; (setq elpy-rpc-python-command "python3")
 (append grep-find-ignored-files "flycheck_*")
@@ -323,8 +330,9 @@
 
 (ep-project-root)
 
-
 ;; (use-package pony-mode)
+
+
 
 (use-package salt-mode)
 
@@ -1253,19 +1261,3 @@ With a prefix argument N, (un)comment that many sexps."
 (provide 'init)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; init.el ends here
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(flycheck-display-errors-function (function flycheck-pos-tip-error-messages))
- '(package-selected-packages
-   (quote
-    (yasnippet writeroom-mode writegood-mode which-key web-mode vimish-fold use-package sx swiper-helm sqlup-mode sql-indent sotlisp smartparens smart-mode-line session salt-mode real-auto-save pyvenv pointback paradox ox-reveal openwith ob-translate nyan-mode multiple-cursors magit lispy keyfreq key-chord impatient-mode highlight-symbol highlight-indentation helm-swoop helm-projectile helm-github-stars helm-dired-recent-dirs helm-descbinds helm-chrome helm-ag header2 free-keys flycheck-pos-tip expand-region electric-operator edit-server easy-kill dired+ diff-hl company-quickhelp comment-dwim-2 bm benchmark-init auto-capitalize aggressive-indent ace-link)))
- '(session-use-package t nil (session)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
