@@ -11,6 +11,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; basic config
 
+;; load custom variables
+(setq custom-file "~/.emacs.d/custom.el")
+(load custom-file)
+
 ;; dont truncate log messages
 (setq message-log-max t)
 
@@ -168,7 +172,7 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; thirtd party packages
+;; Thirtd party packages
 
 ;; add melpa to archives
 (package-initialize)
