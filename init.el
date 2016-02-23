@@ -1254,7 +1254,7 @@ With a prefix argument N, (un)comment that many sexps."
 (key-chord-define-global "kf" 'bury-buffer)
 (key-chord-define-global "kw" 'delete-window)
 (key-chord-define-global "md" 'current-dired)
-(key-chord-define-global "mg" 'magit-status)
+(key-chord-define-global "mg" 'my-magit-status)
 (key-chord-define-global "mx" 'helm-M-x)
 (key-chord-define-global "ps" 'helm-projectile-switch-project)
 (key-chord-define-global "pf" 'helm-projectile-find-file)
