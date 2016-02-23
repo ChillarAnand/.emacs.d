@@ -1240,7 +1240,7 @@ With a prefix argument N, (un)comment that many sexps."
 
 (require 'key-chord)
 (key-chord-mode +1)
-(key-chord-define-global "dd" 'delete-whole-line)
+;; (key-chord-define-global "dd" 'delete-whole-line)
 (key-chord-define-global "df" 'describe-function)
 (key-chord-define-global "dk" 'describe-key)
 (key-chord-define-global "dv" 'describe-variable)
