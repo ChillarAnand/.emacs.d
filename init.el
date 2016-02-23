@@ -119,32 +119,6 @@
 ;; Packages
 
 
-;; dired config
-(require 'dired)
-
-;; auto revert dired buffers
-(add-hook 'dired-mode-hook 'auto-revert-mode)
-
-;; auto select target as split
-(setq dired-dwim-target t)
-
-(setq delete-by-moving-to-trash t)
-(setq dired-no-confirm t)
-(define-key dired-mode-map "u" 'dired-up-directory)
-(setq dired-deletion-confirmer '(lambda (x) t))
-
-;; unzip zipped file dired
-(eval-after-load "dired-aux"
-  '(add-to-list 'dired-compress-file-suffixes
-                '("\\.zip\\'" ".zip" "unzip")))
-
-;; hide unnecessary files
-(setq-default dired-omit-files "^\\.?#\\|^\\.$\\|^\\.\\.$\\|^\\.")
-
-;; (defadvice dired-delete-entry (before force-clean-up-buffers (file) activate)
-;;   (kill-buffer (get-file-buffer file)))
-
-
 
 ;; save recent files
 (require 'recentf)
@@ -216,8 +190,40 @@
 
 
 ;; general packages
+
+
+;; dired config
+(require 'dired)
 (use-package dired+)
+(use-package dired-details+)
+
+;; auto select target as split
+(setq dired-dwim-target t)
+;; Always recursively delete directory
+(setq dired-recursive-deletes 'always)
+(setq dired-recursive-copies 'always)
+(setq delete-by-moving-to-trash t
+      trash-directory "~/.Trash/emacs")
+(setq dired-no-confirm t)
+(setq dired-deletion-confirmer '(lambda (x) t))
+;; auto revert dired buffers
+(add-hook 'dired-mode-hook 'auto-revert-mode)
+(define-key dired-mode-map "u" 'dired-up-directory)
+
+;; unzip zipped file dired
+(eval-after-load "dired-aux"
+  '(add-to-list 'dired-compress-file-suffixes
+                '("\\.zip\\'" ".zip" "unzip")))
+
+(setq dired-details-hide-link-targets nil)
+(setq-default dired-omit-mode t)
+(define-key dired-mode-map (kbd "C-o") 'dired-omit-mode)
+;; hide unnecessary files
+(setq-default dired-omit-files "^\\.?#\\|^\\.$\\|^\\.\\.$\\|^\\.")
+;;(add-to-list 'dired-omit-extension ".example")
 (diredp-toggle-find-file-reuse-dir 1)
+
+
 
 
 ;; programming mode packages
@@ -400,6 +406,14 @@
 (use-package magit
   :config
 
+  (defun my-magit-status ()
+    "Don't split window."
+    (interactive)
+    (let ((pop-up-windows nil))
+      (call-interactively 'magit-status)
+      (magit-section-forward-sibling)
+      (magit-section-forward)))
+
   ;; hide async shell command output buffers
   (add-to-list 'display-buffer-alist (cons "\\*Async Shell Command\\*.*" (cons #'display-buffer-no-window nil)))
 
@@ -413,7 +427,8 @@
   (setq magit-last-seen-setup-instructions "1.4.0")
   (global-git-commit-mode)
 
-  (bind-key "C-c C-s" 'git-sync))
+  (bind-key "C-c C-s" 'git-sync)
+  (bind-key "C-x C-g" 'my-magit-status))
 
 
 (use-package diff-hl
@@ -650,7 +665,7 @@
 (use-package which-key
   :config
   (which-key-mode)
-  (which-key-setup-side-window-right))
+  (which-key-setup-side-window-bottom))
 
 
 (use-package expand-region
@@ -1155,7 +1170,7 @@ With a prefix argument N, (un)comment that many sexps."
  ("C-x C-a" . beginning-of-buffer)
  ("C-x C-b" . switch-to-previous-buffer)
  ("C-x C-d" . duplicate-current-line-or-region)
- ("C-x C-h" . mark-whole-buffer)
+ ;; ("C-x C-h" . mark-whole-buffer)
  ("C-x C-i" . delete-other-windows)
  ("C-x C-k" . kill-this-buffer)
  ("C-x C-m" . helm-M-x)
