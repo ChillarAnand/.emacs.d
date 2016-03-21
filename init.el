@@ -357,7 +357,7 @@
   (setq web-mode-markup-indent-offset 4)
   (setq web-mode-code-indent-offset 4)
   (setq web-mode-css-indent-offset 4)
-  (setq web-mode-js-indent-offset 0)
+  (setq web-mode-js-indent-offset 4)
 
   (setq web-mode-script-padding 0)
   (setq web-mode-enable-auto-expanding t)
@@ -765,7 +765,10 @@
 ;; slides
 (load-file "~/.emacs.d/vendor/htmlize.el")
 (use-package htmlize)
+
 (require 'org)
+(setq org-agenda-span 30)
+
 (use-package ox-reveal
   :config
   (setq org-reveal-root "file:///home/anand/.emacs.d/vendor/reveal.js"))
