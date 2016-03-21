@@ -11,6 +11,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; basic config
 
+;; load custom variables
+(setq custom-file "~/.emacs.d/custom.el")
+(load custom-file)
+
 ;; dont truncate log messages
 (setq message-log-max t)
 
@@ -119,31 +123,6 @@
 ;; Packages
 
 
-;; dired config
-(require 'dired)
-
-;; auto revert dired buffers
-(add-hook 'dired-mode-hook 'auto-revert-mode)
-
-;; auto select target as split
-(setq dired-dwim-target t)
-
-(setq delete-by-moving-to-trash t)
-(setq dired-no-confirm t)
-(define-key dired-mode-map "u" 'dired-up-directory)
-(setq dired-deletion-confirmer '(lambda (x) t))
-
-;; unzip zipped file dired
-(eval-after-load "dired-aux"
-  '(add-to-list 'dired-compress-file-suffixes
-                '("\\.zip\\'" ".zip" "unzip")))
-
-;; hide unnecessary files
-(setq-default dired-omit-files "^\\.?#\\|^\\.$\\|^\\.\\.$\\|^\\.")
-
-;; (defadvice dired-delete-entry (before force-clean-up-buffers (file) activate)
-;;   (kill-buffer (get-file-buffer file)))
-
 
 ;; save recent files
 (require 'recentf)
@@ -160,11 +139,23 @@
 
 
 
-;; save point positions across sessions
-(require 'saveplace)
-(setq-default save-place t)
-(setq save-place-forget-unreadable-files nil)
-(setq save-place-file (concat user-emacs-directory "saveplace.el"))
+;; Automatically save and restore sessions
+(setq desktop-dirname             "~/.emacs.d/desktop/"
+      desktop-base-file-name      "emacs.desktop"
+      desktop-base-lock-name      "lock"
+      desktop-path                (list desktop-dirname)
+      desktop-save                t
+      desktop-files-not-to-save   "^$" ;reload tramp paths
+      desktop-load-locked-desktop nil)
+(desktop-save-mode 1)
+
+(defun my-desktop ()
+  "Load the desktop and enable autosaving"
+  (interactive)
+  (let ((desktop-load-locked-desktop "ask"))
+    (desktop-read)
+    (desktop-save-mode 1)))
+
 
 
 ;; save history
@@ -178,6 +169,10 @@
 ;; enable semantic mode
 (semantic-mode 1)
 
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Thirtd party packages
 
 ;; add melpa to archives
 (package-initialize)
@@ -197,14 +192,43 @@
 (setq use-package-always-ensure t)
 
 
+
 ;; general packages
+
+
+;; dired config
+(require 'dired)
 (use-package dired+)
+(use-package dired-details+)
+
+;; auto select target as split
+(setq dired-dwim-target t)
+;; Always recursively delete directory
+(setq dired-recursive-deletes 'always)
+(setq dired-recursive-copies 'always)
+(setq delete-by-moving-to-trash t
+      trash-directory "~/.Trash/emacs")
+(setq dired-no-confirm t)
+(setq dired-deletion-confirmer '(lambda (x) t))
+;; auto revert dired buffers
+(add-hook 'dired-mode-hook 'auto-revert-mode)
+(define-key dired-mode-map "u" 'dired-up-directory)
+
+;; unzip zipped file dired
+(eval-after-load "dired-aux"
+  '(add-to-list 'dired-compress-file-suffixes
+                '("\\.zip\\'" ".zip" "unzip")))
+
+(setq dired-details-hide-link-targets nil)
+(setq-default dired-omit-mode t)
+(define-key dired-mode-map (kbd "C-o") 'dired-omit-mode)
+;; hide unnecessary files
+(setq-default dired-omit-files "^\\.?#\\|^\\.$\\|^\\.\\.$\\|^\\.")
+;;(add-to-list 'dired-omit-extension ".example")
 (diredp-toggle-find-file-reuse-dir 1)
 
 
-(use-package session)
-(add-hook 'after-init-hook 'session-initialize)
-(setq session-name-disable-regexp "\\(?:\\`'\\.git/[A-Z_]+\\'\\)")
+
 
 ;; programming mode packages
 
@@ -259,7 +283,7 @@
 (setq python-indent-offset 4)
 (setq elpy-test-runner 'elpy-test-pytest-runner)
 (setq elpy-rpc-timeout nil)
-(setq elpy-rgrep-file-pattern   "*.py *.html")
+(setq elpy-rgrep-file-pattern "*.py *.html")
 
 ;; (setq elpy-rpc-python-command "python3")
 (append grep-find-ignored-files "flycheck_*")
@@ -316,8 +340,9 @@
 
 (ep-project-root)
 
-
 ;; (use-package pony-mode)
+
+
 
 (use-package salt-mode)
 
@@ -385,12 +410,13 @@
 (use-package magit
   :config
 
-  ;; restore pointer in git commit buffer
-  (add-hook 'git-commit-mode-hook #'keep-saveplace-off)
-
-  (defun keep-saveplace-off ()
-    (when (bound-and-true-p git-commit-mode)
-      (toggle-save-place)))
+  (defun my-magit-status ()
+    "Don't split window."
+    (interactive)
+    (let ((pop-up-windows nil))
+      (call-interactively 'magit-status)
+      (magit-section-forward-sibling)
+      (magit-section-forward)))
 
   ;; hide async shell command output buffers
   (add-to-list 'display-buffer-alist (cons "\\*Async Shell Command\\*.*" (cons #'display-buffer-no-window nil)))
@@ -405,7 +431,8 @@
   (setq magit-last-seen-setup-instructions "1.4.0")
   (global-git-commit-mode)
 
-  (bind-key "C-c C-s" 'git-sync))
+  (bind-key "C-c C-s" 'git-sync)
+  (bind-key "C-x C-g" 'my-magit-status))
 
 
 (use-package diff-hl
@@ -642,7 +669,7 @@
 (use-package which-key
   :config
   (which-key-mode)
-  (which-key-setup-side-window-right))
+  (which-key-setup-side-window-bottom))
 
 
 (use-package expand-region
@@ -1127,12 +1154,7 @@ With a prefix argument N, (un)comment that many sexps."
 (defun start-space-to-ctrl ()
   "Active space2cctl."
   (interactive)
-  (async-shell-command "s2cctl start"))
-
-(defun stop-space-to-ctrl ()
-  "Active space2cctl."
-  (interactive)
-  (async-shell-command "s2cctl stop"))
+  (async-shell-command "~/projects/ubuntu/os/space2ctrl.sh"))
 
 (start-space-to-ctrl)
 
@@ -1155,7 +1177,7 @@ With a prefix argument N, (un)comment that many sexps."
  ("C-x C-a" . beginning-of-buffer)
  ("C-x C-b" . switch-to-previous-buffer)
  ("C-x C-d" . duplicate-current-line-or-region)
- ("C-x C-h" . mark-whole-buffer)
+ ;; ("C-x C-h" . mark-whole-buffer)
  ("C-x C-i" . delete-other-windows)
  ("C-x C-k" . kill-this-buffer)
  ("C-x C-m" . helm-M-x)
@@ -1221,7 +1243,7 @@ With a prefix argument N, (un)comment that many sexps."
 
 (require 'key-chord)
 (key-chord-mode +1)
-(key-chord-define-global "dd" 'delete-whole-line)
+;; (key-chord-define-global "dd" 'delete-whole-line)
 (key-chord-define-global "df" 'describe-function)
 (key-chord-define-global "dk" 'describe-key)
 (key-chord-define-global "dv" 'describe-variable)
@@ -1235,7 +1257,7 @@ With a prefix argument N, (un)comment that many sexps."
 (key-chord-define-global "kf" 'bury-buffer)
 (key-chord-define-global "kw" 'delete-window)
 (key-chord-define-global "md" 'current-dired)
-(key-chord-define-global "mg" 'magit-status)
+(key-chord-define-global "mg" 'my-magit-status)
 (key-chord-define-global "mx" 'helm-M-x)
 (key-chord-define-global "ps" 'helm-projectile-switch-project)
 (key-chord-define-global "pf" 'helm-projectile-find-file)
