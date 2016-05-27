@@ -50,10 +50,10 @@
       (delq 'process-kill-buffer-query-function kill-buffer-query-functions))
 
 ;; confirm before killing emacs
-(setq confirm-kill-emacs
-      (lambda (&rest _)
-        (message "Quit in 3 sec (`C-g' or other action cancels)")
-        (sit-for 3)))
+;; (setq confirm-kill-emacs
+;;       (lambda (&rest _)
+;;         (message "Quit in 3 sec (`C-g' or other action cancels)")
+;;         (sit-for 3)))
 
 ;; always split vertically
 (setq split-height-threshold nil)
@@ -66,6 +66,10 @@
 (setq max-lisp-eval-depth 10000)
 (setq max-specpdl-size 32000)
 
+;; enable auto copy
+(setq x-select-enable-primary t)
+(setq x-select-enable-clipboard t)
+;; (setq mouse-drag-copy-region t)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -140,21 +144,22 @@
 
 
 ;; Automatically save and restore sessions
-(setq desktop-dirname             "~/.emacs.d/desktop/"
-      desktop-base-file-name      "emacs.desktop"
-      desktop-base-lock-name      "lock"
-      desktop-path                (list desktop-dirname)
-      desktop-save                t
-      desktop-files-not-to-save   "^$" ;reload tramp paths
-      desktop-load-locked-desktop nil)
-(desktop-save-mode 1)
+;; (require 'desktop)
+;; (setq desktop-dirname             "~/.emacs.d/desktop/"
+;;       desktop-base-file-name      "emacs.desktop"
+;;       desktop-base-lock-name      "lock"
+;;       desktop-path                (list desktop-dirname)
+;;       desktop-save                t
+;;       desktop-files-not-to-save   "^$"  ;reload tramp paths
+;;       desktop-load-locked-desktop nil)
+;; (desktop-save-mode 1)
 
-(defun my-desktop ()
-  "Load the desktop and enable autosaving"
-  (interactive)
-  (let ((desktop-load-locked-desktop "ask"))
-    (desktop-read)
-    (desktop-save-mode 1)))
+;; (defun my-desktop ()
+;;   "Load the desktop and enable autosaving"
+;;   (interactive)
+;;   (let ((desktop-load-locked-desktop "ask"))
+;;     (desktop-read)
+;;     (desktop-save-mode 1)))
 
 
 
@@ -303,7 +308,14 @@
   (with-current-buffer (process-buffer (elpy-shell-get-or-create-process))
     (set-window-point (get-buffer-window (current-buffer))
                       (point-max))))
+
 (define-key elpy-mode-map (kbd "C-c C-c") 'my/send-region-or-buffer)
+
+(defun my/elpy-check ()
+  (interactive)
+  (elpy-check))
+
+(define-key elpy-mode-map (kbd "C-c C-v") 'my/elpy-check)
 (define-key elpy-mode-map (kbd "M-,") 'pop-tag-mark)
 
 (defun company-yasnippet-or-completion ()
@@ -403,6 +415,9 @@
 (use-package nyan-mode
   :init
   (nyan-mode))
+
+
+(use-package ctags-update)
 
 
 (use-package pointback)
@@ -506,7 +521,7 @@
   (setq openwith-associations
         (list (list (openwith-make-extension-regexp '("pdf"))
                     "evince" '(file))
-              (list (openwith-make-extension-regexp '("flac" "mp3" "wav"))
+              (list (openwith-make-extension-regexp '("flac" "mp3" "wav" "webm" "mp4"))
                     "vlc" '(file))
               (list (openwith-make-extension-regexp
                      '("avi" "flv" "mov" "mp4" "mkv" "mpeg" "mpg" "ogg" "wmv"))
@@ -570,14 +585,15 @@
 
   (setq helm-mini-default-sources '(helm-source-buffers-list
                                     helm-source-recentf
-                                    helm-source-dired-recent-dirs
-                                    helm-source-emacs-commands-history
-                                    helm-source-emacs-commands
-                                    helm-chrome-source
-                                    hgs/helm-c-source-stars
-                                    hgs/helm-c-source-repos
-                                    helm-source-buffer-not-found
-                                    hgs/helm-c-source-search))
+                                    ;; helm-source-dired-recent-dirs
+                                    ;; helm-source-emacs-commands-history
+                                    ;; helm-source-emacs-commands
+                                    ;; helm-chrome-source
+                                    ;; hgs/helm-c-source-stars
+                                    ;; hgs/helm-c-source-repos
+                                    ;; helm-source-buffer-not-found
+                                    ;; hgs/helm-c-source-search
+                                    ))
 
   (setq  helm-ff-newfile-prompt-p              nil
          helm-echo-input-in-header-line        t
@@ -592,6 +608,7 @@
 
 
 ;; swiper for search
+(use-package ivy)
 (use-package swiper-helm
   :config
   (ivy-mode 1)
@@ -795,6 +812,9 @@
 
 (require 'org)
 (setq org-agenda-span 30)
+(setq org-todo-keywords
+      '((sequence "TODO" "IN-PROGRESS" "WAITING" "DONE")))
+
 
 (use-package ox-reveal
   :config
@@ -1186,6 +1206,7 @@ With a prefix argument N, (un)comment that many sexps."
  ("C-x r l" . helm-bookmarks)
 
  ("C-c C-f" . helm-projectile-find-file)
+ ("C-x C-f" . helm-projectile-find-file)
  ("C-c C-g" . beginning-of-buffer)
  ("C-c C-k" . delete-other-windows)
  ("C-c C-v" . eval-buffer)
@@ -1276,6 +1297,8 @@ With a prefix argument N, (un)comment that many sexps."
   (save-some-buffers t))
 (add-hook 'focus-out-hook 'save-all)
 
+;; load do.org
+(find-file "~/Dropbox/do.org")
 
 (message "Successfully loaded config... ")
 
