@@ -177,13 +177,13 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Thirtd party packages
+;; Third party packages
 
 ;; add melpa to archives
 (package-initialize)
 (add-to-list 'package-archives
              '("melpa" . "http://melpa.org/packages/") t)
-(package-refresh-contents)
+;;(package-refresh-contents)
 (package-initialize)
 
 ;; dont check signatures
@@ -206,32 +206,32 @@
 (use-package dired+)
 (use-package dired-details+)
 
-;; auto select target as split
-(setq dired-dwim-target t)
-;; Always recursively delete directory
-(setq dired-recursive-deletes 'always)
-(setq dired-recursive-copies 'always)
-(setq delete-by-moving-to-trash t
-      trash-directory "~/.Trash/emacs")
-(setq dired-no-confirm t)
-(setq dired-deletion-confirmer '(lambda (x) t))
+(setq dired-recursive-deletes 'always
+      dired-recursive-copies 'always
+      delete-by-moving-to-trash t
+      trash-directory "~/.Trash/emacs"
+      dired-no-confirm t
+      dired-dwim-target t
+      dired-deletion-confirmer '(lambda (x) t)
+      dired-details-hide-link-targets nil)
+
+(setq-default dired-omit-mode t)
+(setq-default dired-omit-files "^\\.?#\\|^\\.$\\|^\\.\\.$\\|^\\.")
+
 ;; auto revert dired buffers
 (add-hook 'dired-mode-hook 'auto-revert-mode)
 (define-key dired-mode-map "u" 'dired-up-directory)
+(define-key dired-mode-map (kbd "C-o") 'dired-omit-mode)
+
+(diredp-toggle-find-file-reuse-dir 1)
 
 ;; unzip zipped file dired
 (eval-after-load "dired-aux"
   '(add-to-list 'dired-compress-file-suffixes
                 '("\\.zip\\'" ".zip" "unzip")))
 
-(setq dired-details-hide-link-targets nil)
-(setq-default dired-omit-mode t)
-(define-key dired-mode-map (kbd "C-o") 'dired-omit-mode)
-;; hide unnecessary files
-(setq-default dired-omit-files "^\\.?#\\|^\\.$\\|^\\.\\.$\\|^\\.")
 ;;(add-to-list 'dired-omit-extension ".example")
-(diredp-toggle-find-file-reuse-dir 1)
-
+;;(add-to-list 'dired-omit-extension ".pyc")
 
 
 
@@ -271,10 +271,10 @@
   (add-hook 'python-mode-hook #'electric-operator-mode))
 
 
-(use-package real-auto-save
-  :config
-  (add-hook 'prog-mode-hook 'real-auto-save-mode)
-  (setq real-auto-save-interval 10))
+;; (use-package real-auto-save
+;;   :config
+;;   (add-hook 'prog-mode-hook 'real-auto-save-mode)
+;;   (setq real-auto-save-interval 10))
 
 
 ;; python mode
@@ -417,7 +417,7 @@
   (nyan-mode))
 
 
-(use-package ctags-update)
+;; (use-package ctags-update)
 
 
 (use-package pointback)
@@ -621,9 +621,9 @@
   (global-set-key [f8] 'ivy-resume))
 
 
-(use-package aggressive-indent
-  :config
-  (global-aggressive-indent-mode 1))
+;; (use-package aggressive-indent
+;;   :config
+;;   (global-aggressive-indent-mode 1))
 
 
 (use-package google-translate
@@ -646,13 +646,19 @@
   (benchmark-init/activate))
 
 
-(use-package markdown-mode)
 
+;; writing
 
 (use-package writegood-mode)
-(use-package writeroom-mode
+(use-package writeroom-mode)
+(use-package artbollocks-mode)
+
+(use-package markdown-mode
   :config
-  (add-hook 'markdown-mode-hook 'cap))
+  (add-hook 'markdown-mode-hook 'writeroom-mode)
+  (add-hook 'markdown-mode-hook 'writegood-mode)
+  (add-hook 'markdown-mode-hook 'artbollocks-mode))
+
 
 (use-package auto-capitalize
   :config
@@ -714,7 +720,11 @@
 
 (use-package lispy
   :config
-  (add-hook 'emacs-lisp-mode-hook (lambda () (lispy-mode 1))))
+  (add-hook 'emacs-lisp-mode-hook (lambda () (lispy-mode 1)))
+
+  (define-key lispy-mode-map (kbd "C-;") #'comment-or-uncomment-sexp)
+  ;; (define-key lispy-mode-map (kbd "C-k") #'my-lispy-kill)
+  (define-key lispy-mode-map (kbd "C-c C-v") #'eval-buffer))
 
 
 (use-package paradox)
@@ -766,8 +776,13 @@
   (interactive)
   (sql-connect-preset 'pool-local))
 
+(defun mysql-get-or-create-process ()
+  "Get or create an inferior Python process for current buffer and return it."
+  (sql-connect))
+
 (defun mysql-send-paragraph ()
   (interactive)
+  (sql-connect)
   (sql-send-paragraph)
   (with-current-buffer (process-buffer (get-process "SQL"))
     (set-window-point (get-buffer-window (current-buffer))
@@ -779,31 +794,31 @@
                'sql-add-newline-first)
   (concat "\n" output))
 
-(defun my-sql-save-history-hook ()
-  (let ((lval 'sql-input-ring-file-name)
-        (rval 'sql-product))
-    (if (symbol-value rval)
-        (let ((filename
-               (concat "~/.emacs.d/sql/"
-                       (symbol-name (symbol-value rval))
-                       "-history.sql")))
-          (set (make-local-variable lval) filename))
-      (error
-       (format "SQL history will not be saved because %s is nil"
-               (symbol-name rval))))))
+;; (defun my-sql-save-history-hook ()
+;;   (let ((lval 'sql-input-ring-file-name)
+;;         (rval 'sql-product))
+;;     (if (symbol-value rval)
+;;         (let ((filename
+;;                (concat "~/.emacs.d/sql/"
+;;                        (symbol-name (symbol-value rval))
+;;                        "-history.sql")))
+;;           (set (make-local-variable lval) filename))
+;;       (error
+;;        (format "SQL history will not be saved because %s is nil"
+;;                (symbol-name rval))))))
 
-(add-hook 'sql-interactive-mode-hook 'my-sql-save-history-hook)
+;; (add-hook 'sql-interactive-mode-hook 'my-sql-save-history-hook)
 
-(defun sql-add-newline-first (output)
-  "Add newline to beginning of OUTPUT for `comint-preoutput-filter-functions'"
-  (concat "\n" output))
+;; (defun sql-add-newline-first (output)
+;;   "Add newline to beginning of OUTPUT for `comint-preoutput-filter-functions'"
+;;   (concat "\n" output))
 
-(defun sqli-add-hooks ()
-  "Add hooks to `sql-interactive-mode-hook'."
-  (add-hook 'comint-preoutput-filter-functions
-            'sql-add-newline-first))
+;; (defun sqli-add-hooks ()
+;;   "Add hooks to `sql-interactive-mode-hook'."
+;;   (add-hook 'comint-preoutput-filter-functions
+;;             'sql-add-newline-first))
 
-(add-hook 'sql-interactive-mode-hook 'sqli-add-hooks)
+;; (add-hook 'sql-interactive-mode-hook 'sqli-add-hooks)
 
 
 ;; slides
@@ -821,6 +836,10 @@
   (setq org-reveal-root "file:///home/anand/.emacs.d/vendor/reveal.js"))
 
 (use-package ob-translate)
+
+
+(use-package restclient)
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; utilities
@@ -1205,11 +1224,9 @@ With a prefix argument N, (un)comment that many sexps."
  ("C-x C-z" . end-of-buffer)
  ("C-x r l" . helm-bookmarks)
 
- ("C-c C-f" . helm-projectile-find-file)
- ("C-x C-f" . helm-projectile-find-file)
+ ("C-x C-f" . helm-find-files)
  ("C-c C-g" . beginning-of-buffer)
  ("C-c C-k" . delete-other-windows)
- ("C-c C-v" . eval-buffer)
 
  ("M-h" . backward-kill-word)
  ("M-o" . other-window)
@@ -1220,10 +1237,6 @@ With a prefix argument N, (un)comment that many sexps."
  ("M-?" . mark-paragraph)
  ("M-/" . hippie-expand))
 
-
-;; lisp mode
-(define-key lispy-mode-map (kbd "C-;") #'comment-or-uncomment-sexp)
-(define-key lispy-mode-map (kbd "C-k") #'my-lispy-kill)
 
 
 ;; kill lines backward
