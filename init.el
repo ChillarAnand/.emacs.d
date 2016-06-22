@@ -183,7 +183,7 @@
 (package-initialize)
 (add-to-list 'package-archives
              '("melpa" . "http://melpa.org/packages/") t)
-;;(package-refresh-contents)
+(package-refresh-contents)
 (package-initialize)
 
 ;; dont check signatures
@@ -282,8 +282,9 @@
 (use-package highlight-indentation)
 (use-package yasnippet)
 (use-package company)
-(add-to-list 'load-path "~/projects/lisp/elpy")
-(load "elpy" nil t)
+(use-package elpy)
+;; (add-to-list 'load-path "~/projects/lisp/elpy")
+;; (load "elpy" nil t)
 (elpy-enable)
 (setq python-indent-offset 4)
 (setq elpy-test-runner 'elpy-test-pytest-runner)
@@ -482,8 +483,7 @@
 (use-package smart-mode-line
   :config
   (setq sml/no-confirm-load-theme t)
-  (rich-minority-mode 1)
-  (setq rm-whitelist nil)
+  (setq rm-whitelist "elpy")
   (sml/setup)
   (sml/apply-theme 'light))
 
@@ -1314,6 +1314,13 @@ With a prefix argument N, (un)comment that many sexps."
 (find-file "~/Dropbox/do.org")
 
 (message "Successfully loaded config... ")
+
+(defun byte-compile-current-buffer ()
+  "`byte-compile' current buffer if it's emacs-lisp-mode and compiled file exists."
+  (interactive)
+  (when (and (eq major-mode 'emacs-lisp-mode)
+             (file-exists-p (byte-compile-dest-file buffer-file-name)))
+    (byte-compile-file buffer-file-name)))
 
 
 (provide 'init)
