@@ -235,6 +235,14 @@
 
 
 
+;; navigation
+
+(use-package goto-last-change
+  :config
+  (global-set-key (kbd "M-m") 'goto-last-change))
+
+
+
 ;; programming mode packages
 
 (use-package projectile
@@ -655,7 +663,7 @@
 
 (use-package markdown-mode
   :config
-  (add-hook 'markdown-mode-hook 'writeroom-mode)
+  ;; (add-hook 'markdown-mode-hook 'writeroom-mode)
   (add-hook 'markdown-mode-hook 'writegood-mode)
   (add-hook 'markdown-mode-hook 'artbollocks-mode))
 
@@ -723,6 +731,7 @@
   (add-hook 'emacs-lisp-mode-hook (lambda () (lispy-mode 1)))
 
   (define-key lispy-mode-map (kbd "C-;") #'comment-or-uncomment-sexp)
+  (define-key lispy-mode-map (kbd "M-m") nil)
   ;; (define-key lispy-mode-map (kbd "C-k") #'my-lispy-kill)
   (define-key lispy-mode-map (kbd "C-c C-v") #'eval-buffer))
 
