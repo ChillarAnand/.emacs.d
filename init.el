@@ -55,9 +55,10 @@
 ;;         (message "Quit in 3 sec (`C-g' or other action cancels)")
 ;;         (sit-for 3)))
 
+
 ;; always split vertically
-(setq split-height-threshold nil)
-(setq split-width-threshold 0)
+;; (setq split-height-threshold nil)
+;; (setq split-width-threshold 0)
 
 
 ;; always kill line with whitespace
@@ -127,7 +128,6 @@
 ;; Packages
 
 
-
 ;; save recent files
 (require 'recentf)
 (setq
@@ -141,18 +141,17 @@
 (run-at-time nil (* 5 60) 'recentf-save-list)
 (run-with-idle-timer 5  nil 'recentf-cleanup)
 
-
-
 ;; Automatically save and restore sessions
-;; (require 'desktop)
-;; (setq desktop-dirname             "~/.emacs.d/desktop/"
-;;       desktop-base-file-name      "emacs.desktop"
-;;       desktop-base-lock-name      "lock"
-;;       desktop-path                (list desktop-dirname)
-;;       desktop-save                t
-;;       desktop-files-not-to-save   "^$"  ;reload tramp paths
-;;       desktop-load-locked-desktop nil)
-;; (desktop-save-mode 1)
+(require 'desktop)
+(setq desktop-dirname             "~/.emacs.d/desktop/"
+      desktop-base-file-name      "emacs.desktop"
+      desktop-base-lock-name      "lock"
+      desktop-path                (list desktop-dirname)
+      desktop-save                t
+      desktop-files-not-to-save   "^$"  ;reload tramp paths
+      desktop-load-locked-desktop nil)
+(desktop-save-mode 1)
+
 
 ;; (defun my-desktop ()
 ;;   "Load the desktop and enable autosaving"
@@ -160,7 +159,6 @@
 ;;   (let ((desktop-load-locked-desktop "ask"))
 ;;     (desktop-read)
 ;;     (desktop-save-mode 1)))
-
 
 
 ;; save history
@@ -240,6 +238,68 @@
 (use-package goto-last-change
   :config
   (global-set-key (kbd "M-m") 'goto-last-change))
+
+
+(use-package golden-ratio
+  :config
+  (golden-ratio-mode 1)
+
+  (defvar golden-ratio-selected-window
+    (frame-selected-window)
+    "Selected window.")
+
+  (defun golden-ratio-set-selected-window
+      (&optional window)
+    "Set selected window to WINDOW."
+    (setq-default
+     golden-ratio-selected-window (or window (frame-selected-window))))
+
+  (defun golden-ratio-selected-window-p
+      (&optional window)
+    "Return t if WINDOW is selected window."
+    (eq (or window (selected-window))
+        (default-value 'golden-ratio-selected-window)))
+
+  (defun golden-ratio-maybe
+      (&optional arg)
+    "Run `golden-ratio' if `golden-ratio-selected-window-p' returns nil."
+    (interactive "p")
+    (unless (golden-ratio-selected-window-p)
+      (golden-ratio-set-selected-window)
+      (golden-ratio arg)))
+
+  (add-hook 'buffer-list-update-hook #'golden-ratio-maybe)
+  (add-hook 'focus-in-hook           #'golden-ratio)
+  (add-hook 'focus-out-hook          #'golden-ratio))
+
+
+(use-package windmove
+  :config
+  (windmove-default-keybindings 'meta))
+
+(use-package ace-window
+  :config
+  (global-set-key (kbd "M-p") 'ace-window)
+  (setq aw-keys '(?d ?f ?g ?h ?j ?k)))
+
+
+;; (use-package neotree
+;;   :config
+;;   (global-set-key [f8] 'neotree-toggle))
+
+(use-package dired-subtree)
+
+
+;; (use-package dirtree
+;;   :config
+;;   (use-package tree-mode)
+;;   (use-package windata)
+
+;;   (defun neotree-current ()
+;;     (interactive)
+;;     (neotree-dir default-directory))
+
+;;   (global-set-key [f8] #'neotree-current))
 
 
 
@@ -456,7 +516,8 @@
   (global-git-commit-mode)
 
   (bind-key "C-c C-s" 'git-sync)
-  (bind-key "C-x C-g" 'my-magit-status))
+  (bind-key "C-x C-g" 'my-magit-status)
+  (define-key magit-mode-map (kbd "M-p") nil))
 
 
 (use-package diff-hl
